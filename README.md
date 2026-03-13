@@ -9,7 +9,7 @@
 
 ## Why This Guide?
 
-This project complements [Anthropic's official documentation](https://docs.anthropic.com/en/docs/claude-code) with a different approach:
+This project complements [Anthropic's official documentation](https://code.claude.com/docs/en/overview) with a different approach:
 
 | | Official Docs | This Guide |
 |--|---------------|------------|
@@ -852,7 +852,7 @@ For detailed testing guidelines, see [TESTING.md](.github/TESTING.md).
 
 ## Additional Resources
 
-- [Claude Code Documentation](https://docs.anthropic.com/en/docs/claude-code)
+- [Claude Code Documentation](https://code.claude.com/docs/en/overview)
 - [MCP Protocol Specification](https://modelcontextprotocol.io)
 - [Skills Repository](https://github.com/luongnv89/skills) - Collection of ready-to-use skills
 - [Anthropic Cookbook](https://github.com/anthropics/anthropic-cookbook)

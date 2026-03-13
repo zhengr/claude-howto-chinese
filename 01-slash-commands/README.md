@@ -55,7 +55,7 @@ Built-in commands are shortcuts for common actions. Type `/` in Claude Code to s
 | `/remote-env` | Configure remote session environment (claude.ai subscribers) |
 | `/rename <name>` | Rename the current session |
 | `/resume [session]` | Resume a conversation by ID or name |
-| `/review` | Request code review |
+| `/review` | **Deprecated** — install the [`code-review` plugin](https://github.com/anthropics/claude-code-marketplace/blob/main/code-review/README.md) instead: `claude plugin install code-review@claude-code-marketplace` |
 | `/rewind` | Rewind the conversation and/or code |
 | `/sandbox` | Enable sandboxed bash tool with filesystem and network isolation |
 | `/security-review` | Complete a security review of pending changes |
@@ -66,13 +66,12 @@ Built-in commands are shortcuts for common actions. Type `/` in Claude Code to s
 | `/teleport` | Resume remote session from claude.ai by session ID |
 | `/terminal-setup` | Install Shift+Enter key binding for newlines |
 | `/theme` | Change the color theme |
-| `/todos` | List current TODO items |
 | `/usage` | Show plan usage limits and rate limit status |
 | `/vim` | Enter vim mode for alternating insert and command modes |
 
 ### Recent Changes
 
-- `/model` picker now shows human-readable labels (e.g., "Sonnet 4.5") instead of raw model IDs
+- `/model` picker now shows human-readable labels (e.g., "Sonnet 4.6") instead of raw model IDs
 - `/rename` auto-generates a session name from conversation context when called without arguments
 - `/rename` now updates the terminal tab title by default
 - `/resume` picker increased initial session count from 10 to 50

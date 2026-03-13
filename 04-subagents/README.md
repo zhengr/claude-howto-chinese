@@ -495,7 +495,9 @@ graph TB
 
 ## Restrict Spawnable Subagents
 
-You can control which subagents a given subagent is allowed to spawn by using the `Task(agent_type)` syntax in the `tools` field. This provides a way to allowlist specific subagents for delegation.
+You can control which subagents a given subagent is allowed to spawn by using the `Agent(agent_type)` syntax in the `tools` field. This provides a way to allowlist specific subagents for delegation.
+
+> **Note**: In v2.1.63, the `Task` tool was renamed to `Agent`. Existing `Task(...)` references still work as aliases.
 
 ### Example
 
@@ -503,7 +505,7 @@ You can control which subagents a given subagent is allowed to spawn by using th
 ---
 name: coordinator
 description: Coordinates work between specialized agents
-tools: Task(worker, researcher), Read, Bash
+tools: Agent(worker, researcher), Read, Bash
 ---
 
 You are a coordinator agent. You can delegate work to the "worker" and

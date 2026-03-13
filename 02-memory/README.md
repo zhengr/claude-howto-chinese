@@ -237,6 +237,8 @@ Claude Code uses a multi-tier hierarchical memory system. Memory files are autom
 6. **Local Project Memory** - Personal project-specific preferences
    - `./CLAUDE.local.md`
 
+> **Note**: `CLAUDE.local.md` is not mentioned in the [official documentation](https://code.claude.com/docs/en/memory) as of March 2026. It may still work as a legacy feature. For new projects, consider using `~/.claude/CLAUDE.md` (user-level) or `.claude/rules/` (project-level, path-scoped) instead.
+
 7. **Auto Memory** - Claude's automatic notes and learnings
    - `~/.claude/projects/<project>/memory/`
 
@@ -1058,4 +1060,4 @@ For the most up-to-date information, refer to the official Claude Code documenta
 
 ### Related Claude Features
 - [Claude Web Memory](https://claude.ai) - Automatic synthesis
-- [Official Memory Docs](https://docs.anthropic.com/en/docs/claude-code/memory) - Anthropic documentation
+- [Official Memory Docs](https://code.claude.com/docs/en/memory) - Anthropic documentation

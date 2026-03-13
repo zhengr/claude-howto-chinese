@@ -90,7 +90,7 @@ Commands are user-invoked shortcuts that execute specific actions.
 
 > **Scope**: `User` = personal workflows (`~/.claude/commands/`), `Project` = team-shared (`.claude/commands/`)
 
-**Reference**: [01-slash-commands/](01-slash-commands/) | [Official Docs](https://docs.anthropic.com/en/docs/claude-code/slash-commands)
+**Reference**: [01-slash-commands/](01-slash-commands/) | [Official Docs](https://code.claude.com/docs/en/interactive-mode)
 
 **Quick Install (All Custom Commands)**:
 ```bash
@@ -131,7 +131,7 @@ Specialized AI assistants with isolated contexts for specific tasks.
 
 > **Scope**: `User` = personal (`~/.claude/agents/`), `Project` = team-shared (`.claude/agents/`)
 
-**Reference**: [04-subagents/](04-subagents/) | [Official Docs](https://docs.anthropic.com/en/docs/claude-code/sub-agents)
+**Reference**: [04-subagents/](04-subagents/) | [Official Docs](https://code.claude.com/docs/en/sub-agents)
 
 **Quick Install (All Custom Agents)**:
 ```bash
@@ -164,7 +164,7 @@ Auto-invoked capabilities with instructions, scripts, and templates.
 └── templates/        # Output templates
 ```
 
-**Reference**: [03-skills/](03-skills/) | [Official Docs](https://docs.anthropic.com/en/docs/claude-code/skills)
+**Reference**: [03-skills/](03-skills/) | [Official Docs](https://code.claude.com/docs/en/skills)
 
 **Quick Install (All Skills)**:
 ```bash
@@ -200,7 +200,7 @@ Bundled collections of commands, agents, MCP servers, and hooks.
 └── scripts/          # Utility scripts
 ```
 
-**Reference**: [07-plugins/](07-plugins/) | [Official Docs](https://docs.anthropic.com/en/docs/claude-code/plugins)
+**Reference**: [07-plugins/](07-plugins/) | [Official Docs](https://code.claude.com/docs/en/plugins)
 
 **Plugin Management Commands**:
 ```bash
@@ -317,7 +317,7 @@ Event-driven automation that executes shell commands on Claude Code events.
 }
 ```
 
-**Reference**: [06-hooks/](06-hooks/) | [Official Docs](https://docs.anthropic.com/en/docs/claude-code/hooks)
+**Reference**: [06-hooks/](06-hooks/) | [Official Docs](https://code.claude.com/docs/en/hooks)
 
 **Quick Install (All Hooks)**:
 ```bash
@@ -344,7 +344,7 @@ Persistent context loaded automatically across sessions.
 
 > **Scope**: `Organization` = managed by admins, `Project` = shared with team via git, `User` = personal preferences, `Local` = not committed, `Session` = auto-managed
 
-**Reference**: [02-memory/](02-memory/) | [Official Docs](https://docs.anthropic.com/en/docs/claude-code/memory)
+**Reference**: [02-memory/](02-memory/) | [Official Docs](https://code.claude.com/docs/en/memory)
 
 **Quick Install**:
 ```bash
@@ -420,7 +420,7 @@ chmod +x ~/.claude/hooks/*.sh
 
 ## Additional Resources
 
-- [Official Claude Code Documentation](https://docs.anthropic.com/en/docs/claude-code)
+- [Official Claude Code Documentation](https://code.claude.com/docs/en/overview)
 - [MCP Protocol Specification](https://modelcontextprotocol.io)
 - [Learning Roadmap](LEARNING-ROADMAP.md)
 - [Main README](README.md)

@@ -9,7 +9,7 @@
 
 | Resource | Description | Link |
 |----------|-------------|------|
-| Claude Code Docs | Official Claude Code documentation | [docs.anthropic.com/en/docs/claude-code](https://docs.anthropic.com/en/docs/claude-code) |
+| Claude Code Docs | Official Claude Code documentation | [code.claude.com/docs/en/overview](https://code.claude.com/docs/en/overview) |
 | Anthropic Docs | Full Anthropic documentation | [docs.anthropic.com](https://docs.anthropic.com) |
 | MCP Protocol | Model Context Protocol specification | [modelcontextprotocol.io](https://modelcontextprotocol.io) |
 | MCP Servers | Official MCP server implementations | [github.com/modelcontextprotocol/servers](https://github.com/modelcontextprotocol/servers) |
@@ -222,7 +222,7 @@ These steps capture the core recommendations for smooth workflows with Claude Co
 | **Auto Memory** | Claude automatically learns and remembers your preferences across sessions | [Memory Guide](02-memory/) |
 | **Remote Control** | Programmatically control Claude Code sessions from external tools and scripts | [Advanced Features](09-advanced-features/) |
 | **Web Sessions** | Access Claude Code through browser-based interfaces for remote development | [CLI Reference](10-cli/) |
-| **Desktop App** | Native desktop application for Claude Code with enhanced UI | [Claude Code Docs](https://docs.anthropic.com/en/docs/claude-code) |
+| **Desktop App** | Native desktop application for Claude Code with enhanced UI | [Claude Code Docs](https://code.claude.com/docs/en/desktop) |
 | **Extended Thinking** | Deep reasoning toggle via `Alt+T`/`Option+T` or `MAX_THINKING_TOKENS` env var | [Advanced Features](09-advanced-features/) |
 | **Permission Modes** | Fine-grained control: default, acceptEdits, plan, dontAsk, bypassPermissions | [Advanced Features](09-advanced-features/) |
 | **7-Tier Memory** | Managed Policy, Project, Project Rules, User, User Rules, Local, Auto Memory | [Memory Guide](02-memory/) |
