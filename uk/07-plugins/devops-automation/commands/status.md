@@ -1,15 +1,15 @@
 ---
 name: System Status
-description: Check overall system health and status
+description: Перевірка загального стану та працездатності системи
 ---
 
-# System Status Check
+# Перевірка стану системи
 
-Check system health across all services:
+Перевірка стану системи по всіх сервісах:
 
-1. Query Kubernetes pod status
-2. Check database connections
-3. Monitor API response times
-4. Review error rates
-5. Check resource utilization
-6. Report overall health
+1. Запит статусу подів Kubernetes
+2. Перевірка з'єднань з базою даних
+3. Моніторинг часу відповіді API
+4. Перегляд частоти помилок
+5. Перевірка використання ресурсів
+6. Звіт про загальний стан

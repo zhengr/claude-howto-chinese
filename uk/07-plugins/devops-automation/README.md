@@ -3,105 +3,105 @@
   <img alt="Claude How To" src="../../resources/logos/claude-howto-logo.svg">
 </picture>
 
-# DevOps Automation Plugin
+# Плагін DevOps Automation
 
-Complete DevOps automation for deployment, monitoring, and incident response.
+Повна автоматизація DevOps для розгортання, моніторингу та реагування на інциденти.
 
-## Features
+## Функції
 
-✅ Automated deployments
-✅ Rollback procedures
-✅ System health monitoring
-✅ Incident response workflows
-✅ Kubernetes integration
+✅ Автоматизовані розгортання
+✅ Процедури відкату
+✅ Моніторинг стану системи
+✅ Робочі процеси реагування на інциденти
+✅ Інтеграція з Kubernetes
 
-## Installation
+## Встановлення
 
 ```bash
 /plugin install devops-automation
 ```
 
-## What's Included
+## Що включено
 
-### Slash Commands
-- `/deploy` - Deploy to production or staging
-- `/rollback` - Rollback to previous version
-- `/status` - Check system health
-- `/incident` - Handle production incidents
+### Слеш-команди
+- `/deploy` — Розгортання на продакшен або стейджинг
+- `/rollback` — Відкат до попередньої версії
+- `/status` — Перевірка стану системи
+- `/incident` — Обробка інцидентів на продакшені
 
-### Subagents
-- `deployment-specialist` - Deployment operations
-- `incident-commander` - Incident coordination
-- `alert-analyzer` - System health analysis
+### Субагенти
+- `deployment-specialist` — Операції розгортання
+- `incident-commander` — Координація інцидентів
+- `alert-analyzer` — Аналіз стану системи
 
-### MCP Servers
-- Kubernetes integration
+### MCP-сервери
+- Інтеграція з Kubernetes
 
-### Scripts
-- `deploy.sh` - Deployment automation
-- `rollback.sh` - Rollback automation
-- `health-check.sh` - Health check utilities
+### Скрипти
+- `deploy.sh` — Автоматизація розгортання
+- `rollback.sh` — Автоматизація відкату
+- `health-check.sh` — Утиліти перевірки стану
 
-### Hooks
-- `pre-deploy.js` - Pre-deployment validation
-- `post-deploy.js` - Post-deployment tasks
+### Хуки
+- `pre-deploy.js` — Передрозгортальна валідація
+- `post-deploy.js` — Післярозгортальні завдання
 
-## Usage
+## Використання
 
-### Deploy to Staging
+### Розгортання на стейджинг
 ```
 /deploy staging
 ```
 
-### Deploy to Production
+### Розгортання на продакшен
 ```
 /deploy production
 ```
 
-### Rollback
+### Відкат
 ```
 /rollback production
 ```
 
-### Check Status
+### Перевірка стану
 ```
 /status
 ```
 
-### Handle Incident
+### Обробка інциденту
 ```
 /incident
 ```
 
-## Requirements
+## Вимоги
 
 - Claude Code 1.0+
 - Kubernetes CLI (kubectl)
-- Cluster access configured
+- Налаштований доступ до кластера
 
-## Configuration
+## Конфігурація
 
-Set up your Kubernetes config:
+Налаштуйте конфіг Kubernetes:
 ```bash
 export KUBECONFIG=~/.kube/config
 ```
 
-## Example Workflow
+## Приклад робочого процесу
 
 ```
 User: /deploy production
 
 Claude:
-1. Runs pre-deploy hook (validates kubectl, cluster connection)
-2. Delegates to deployment-specialist subagent
-3. Runs deploy.sh script
-4. Monitors deployment progress via Kubernetes MCP
-5. Runs post-deploy hook (waits for pods, smoke tests)
-6. Provides deployment summary
+1. Запускає pre-deploy хук (валідація kubectl, з'єднання з кластером)
+2. Делегує субагенту deployment-specialist
+3. Запускає скрипт deploy.sh
+4. Моніторить прогрес розгортання через Kubernetes MCP
+5. Запускає post-deploy хук (очікування подів, smoke-тести)
+6. Надає підсумок розгортання
 
-Result:
-✅ Deployment complete
-📦 Version: v2.1.0
-🚀 Pods: 3/3 ready
-⏱️  Time: 2m 34s
+Результат:
+✅ Розгортання завершено
+📦 Версія: v2.1.0
+🚀 Поди: 3/3 готові
+⏱️  Час: 2хв 34с
 ```

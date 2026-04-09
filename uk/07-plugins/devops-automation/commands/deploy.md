@@ -1,15 +1,15 @@
 ---
 name: Deploy
-description: Deploy application to production or staging
+description: Розгортання застосунку на продакшен або стейджинг
 ---
 
-# Deploy Application
+# Розгортання застосунку
 
-Execute deployment workflow:
+Виконання робочого процесу розгортання:
 
-1. Run pre-deployment checks
-2. Build application
-3. Run tests
-4. Deploy to target environment
-5. Run health checks
-6. Notify team on Slack
+1. Запуск передрозгортальних перевірок
+2. Збірка застосунку
+3. Запуск тестів
+4. Розгортання на цільове середовище
+5. Запуск перевірок стану
+6. Повідомлення команди в Slack

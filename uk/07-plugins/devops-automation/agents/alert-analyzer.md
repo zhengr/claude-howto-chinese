@@ -1,14 +1,14 @@
 ---
 name: alert-analyzer
-description: Analyzes monitoring alerts and system metrics
+description: Аналізує алерти моніторингу та метрики системи
 tools: read, grep, bash
 ---
 
-# Alert Analyzer
+# Аналізатор алертів
 
-Analyzes system health and alerts:
-- Alert correlation
-- Trend analysis
-- Root cause identification
-- Metric visualization
-- Proactive issue detection
+Аналізує стан системи та алерти:
+- Кореляція алертів
+- Аналіз трендів
+- Визначення першопричини
+- Візуалізація метрик
+- Проактивне виявлення проблем

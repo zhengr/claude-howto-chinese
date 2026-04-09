@@ -3,117 +3,117 @@
   <img alt="Claude How To" src="../../resources/logos/claude-howto-logo.svg">
 </picture>
 
-# Documentation Plugin
+# Плагін Documentation
 
-Comprehensive documentation generation and maintenance for your project.
+Комплексна генерація та підтримка документації для вашого проєкту.
 
-## Features
+## Функції
 
-✅ API documentation generation
-✅ README creation and updates
-✅ Documentation synchronization
-✅ Code comment improvements
-✅ Example generation
+✅ Генерація API-документації
+✅ Створення та оновлення README
+✅ Синхронізація документації
+✅ Покращення коментарів коду
+✅ Генерація прикладів
 
-## Installation
+## Встановлення
 
 ```bash
 /plugin install documentation
 ```
 
-## What's Included
+## Що включено
 
-### Slash Commands
-- `/generate-api-docs` - Generate API documentation
-- `/generate-readme` - Create or update README
-- `/sync-docs` - Sync docs with code changes
-- `/validate-docs` - Validate documentation
+### Слеш-команди
+- `/generate-api-docs` — Генерація API-документації
+- `/generate-readme` — Створення або оновлення README
+- `/sync-docs` — Синхронізація документації зі змінами коду
+- `/validate-docs` — Валідація документації
 
-### Subagents
-- `api-documenter` - API documentation specialist
-- `code-commentator` - Code comment improvements
-- `example-generator` - Code example creation
+### Субагенти
+- `api-documenter` — Спеціаліст з API-документації
+- `code-commentator` — Покращення коментарів коду
+- `example-generator` — Створення прикладів коду
 
-### Templates
-- `api-endpoint.md` - API endpoint documentation template
-- `function-docs.md` - Function documentation template
-- `adr-template.md` - Architecture Decision Record template
+### Шаблони
+- `api-endpoint.md` — Шаблон документації ендпоінту API
+- `function-docs.md` — Шаблон документації функції
+- `adr-template.md` — Шаблон Architecture Decision Record
 
-### MCP Servers
-- GitHub integration for documentation syncing
+### MCP-сервери
+- Інтеграція з GitHub для синхронізації документації
 
-## Usage
+## Використання
 
-### Generate API Documentation
+### Генерація API-документації
 ```
 /generate-api-docs
 ```
 
-### Create README
+### Створення README
 ```
 /generate-readme
 ```
 
-### Sync Documentation
+### Синхронізація документації
 ```
 /sync-docs
 ```
 
-### Validate Documentation
+### Валідація документації
 ```
 /validate-docs
 ```
 
-## Requirements
+## Вимоги
 
 - Claude Code 1.0+
-- GitHub access (optional)
+- Доступ до GitHub (опціонально)
 
-## Example Workflow
+## Приклад робочого процесу
 
 ```
 User: /generate-api-docs
 
 Claude:
-1. Scans all API endpoints in /src/api/
-2. Delegates to api-documenter subagent
-3. Extracts function signatures and JSDoc
-4. Organizes by module/endpoint
-5. Uses api-endpoint.md template
-6. Generates comprehensive markdown docs
-7. Includes curl, JavaScript, and Python examples
+1. Сканує всі API-ендпоінти в /src/api/
+2. Делегує субагенту api-documenter
+3. Витягує сигнатури функцій та JSDoc
+4. Організує за модулями/ендпоінтами
+5. Використовує шаблон api-endpoint.md
+6. Генерує комплексну markdown-документацію
+7. Включає приклади curl, JavaScript та Python
 
-Result:
-✅ API documentation generated
-📄 Files created:
+Результат:
+✅ API-документація згенерована
+📄 Створені файли:
    - docs/api/users.md
    - docs/api/auth.md
    - docs/api/products.md
-📊 Coverage: 23/23 endpoints documented
+📊 Покриття: 23/23 ендпоінти задокументовано
 ```
 
-## Templates Usage
+## Використання шаблонів
 
-### API Endpoint Template
-Use for documenting REST API endpoints with full examples.
+### Шаблон ендпоінту API
+Використовуйте для документування REST API ендпоінтів з повними прикладами.
 
-### Function Documentation Template
-Use for documenting individual functions/methods.
+### Шаблон документації функції
+Використовуйте для документування окремих функцій/методів.
 
-### ADR Template
-Use for documenting architectural decisions.
+### Шаблон ADR
+Використовуйте для документування архітектурних рішень.
 
-## Configuration
+## Конфігурація
 
-Set up GitHub token for documentation syncing:
+Налаштуйте GitHub-токен для синхронізації документації:
 ```bash
 export GITHUB_TOKEN="your_github_token"
 ```
 
-## Best Practices
+## Найкращі практики
 
-- Keep documentation close to code
-- Update docs with code changes
-- Include practical examples
-- Validate regularly
-- Use templates for consistency
+- Тримайте документацію близько до коду
+- Оновлюйте документацію разом зі змінами коду
+- Включайте практичні приклади
+- Регулярно валідуйте
+- Використовуйте шаблони для консистентності

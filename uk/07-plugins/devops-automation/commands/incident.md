@@ -1,16 +1,16 @@
 ---
 name: Incident Response
-description: Handle production incidents with structured response
+description: Обробка інцидентів на продакшені зі структурованим реагуванням
 ---
 
-# Incident Response
+# Реагування на інциденти
 
-Structured incident response workflow:
+Структурований процес реагування на інциденти:
 
-1. Create incident record
-2. Assess severity and impact
-3. Notify on-call team
-4. Gather diagnostic information
-5. Coordinate response efforts
-6. Document resolution
-7. Schedule post-mortem
+1. Створення запису інциденту
+2. Оцінка серйозності та впливу
+3. Повідомлення чергової команди
+4. Збір діагностичної інформації
+5. Координація зусиль з реагування
+6. Документування розв'язання
+7. Планування post-mortem

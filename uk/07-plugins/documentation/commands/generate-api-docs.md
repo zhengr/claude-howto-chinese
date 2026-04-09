@@ -1,15 +1,15 @@
 ---
 name: Generate API Documentation
-description: Generate comprehensive API documentation from source code
+description: Генерація комплексної API-документації з вихідного коду
 ---
 
-# API Documentation Generator
+# Генератор API-документації
 
-Generate complete API documentation:
+Генерація повної API-документації:
 
-1. Scan API endpoints
-2. Extract function signatures and JSDoc
-3. Organize by module/endpoint
-4. Create markdown with examples
-5. Include request/response schemas
-6. Add error documentation
+1. Сканування API-ендпоінтів
+2. Витягування сигнатур функцій та JSDoc
+3. Організація за модулями/ендпоінтами
+4. Створення markdown з прикладами
+5. Включення схем запитів/відповідей
+6. Додавання документації помилок

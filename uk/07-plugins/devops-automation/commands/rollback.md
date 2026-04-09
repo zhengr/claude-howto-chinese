@@ -1,14 +1,14 @@
 ---
 name: Rollback
-description: Rollback to previous deployment
+description: Відкат до попереднього розгортання
 ---
 
-# Rollback Deployment
+# Відкат розгортання
 
-Rollback to previous stable version:
+Відкат до попередньої стабільної версії:
 
-1. Identify previous deployment
-2. Verify rollback target is healthy
-3. Execute rollback procedure
-4. Run health checks
-5. Notify team
+1. Визначення попереднього розгортання
+2. Перевірка працездатності цілі відкату
+3. Виконання процедури відкату
+4. Запуск перевірок стану
+5. Повідомлення команди

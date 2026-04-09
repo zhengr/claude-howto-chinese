@@ -1,14 +1,14 @@
 ---
 name: Validate Documentation
-description: Validate documentation for completeness and accuracy
+description: Валідація документації на повноту та точність
 ---
 
-# Documentation Validation
+# Валідація документації
 
-Validate documentation quality:
+Перевірка якості документації:
 
-1. Check for broken links
-2. Verify code examples
-3. Ensure completeness
-4. Check formatting
-5. Validate against actual code
+1. Перевірка на зламані посилання
+2. Верифікація прикладів коду
+3. Забезпечення повноти
+4. Перевірка форматування
+5. Валідація відповідності реальному коду
