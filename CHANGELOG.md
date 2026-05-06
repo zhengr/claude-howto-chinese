@@ -1,5 +1,75 @@
 # Changelog
 
+## [v2.1.131] — 2026-05-06
+
+### Synced to Claude Code v2.1.131
+
+Bumps tutorial coverage from Claude Code v2.1.126 → v2.1.131 (May 6, 2026
+release). Anthropic shipped v2.1.128, v2.1.129, and v2.1.131 since the last
+sync; v2.1.127 and v2.1.130 were skipped and never released publicly.
+
+### Added (English docs)
+
+- `--plugin-url <url>` flag (v2.1.129) — fetches a plugin `.zip` archive from
+  a URL for the current session. Repeatable. Documented in
+  `07-plugins/README.md`.
+- `CLAUDE_CODE_FORCE_SYNC_OUTPUT` env var (v2.1.129) — forces synchronous
+  output for terminals where auto-detection misses (e.g., Emacs `eat`).
+  Documented in `10-cli/README.md` and `09-advanced-features/README.md`.
+- `CLAUDE_CODE_PACKAGE_MANAGER_AUTO_UPDATE` env var (v2.1.129) — enables
+  background upgrades for Homebrew/WinGet installs (which normally do not
+  auto-update). Documented in `10-cli/README.md` and
+  `09-advanced-features/README.md`.
+- `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` env var (v2.1.129) — required
+  to opt in to `/v1/models` gateway discovery (see Changed). Documented in
+  `10-cli/README.md`.
+- `disableRemoteControl` setting (v2.1.128) — admins can block
+  `claude remote-control` and `/remote-control` via managed/policy scope.
+  Documented in `09-advanced-features/README.md`.
+- `--plugin-dir` accepts `.zip` archives (v2.1.128) — alongside directory
+  inputs. Documented in `07-plugins/README.md`.
+- `skillOverrides` accepts `"name-only"` and `"user-invocable-only"`
+  (v2.1.129) — in addition to the previous `"on"`/`"off"`. Documented in
+  `03-skills/README.md`.
+
+### Changed
+
+- **Behavior change**: Gateway `/v1/models` discovery is now **opt-in**
+  (v2.1.129). Previously (v2.1.126), setting `ANTHROPIC_BASE_URL` automatically
+  populated `/model` from the gateway's `/v1/models` endpoint. From v2.1.129,
+  users must additionally set `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`;
+  without the env var, `/model` falls back to the built-in static list.
+  Documented in `10-cli/README.md`.
+- `/mcp` shows tool count per server and visually flags servers reporting 0
+  tools (v2.1.128). Documented in `05-mcp/README.md`.
+- Bare `/color` (no args) picks a random session color (v2.1.128); explicit
+  `/color <name|hex>` continues to set a specific color. Documented in
+  `01-slash-commands/README.md`.
+- `--channels` flag now works with API-key (console) authentication
+  (v2.1.128). Earlier releases required Pro/Max OAuth. Documented in
+  `09-advanced-features/README.md`.
+- Ctrl+R history picker defaults to **all prompts across all projects**
+  (v2.1.129). Press Ctrl+S inside the picker to narrow scope to the current
+  project. Documented in `09-advanced-features/README.md`.
+- `/context` no longer dumps its ASCII visualization into the conversation
+  (v2.1.129). The viz is shown in-UI only; no more ~1.6k token cost per
+  invocation. Documented in `09-advanced-features/README.md`.
+- Oversized images in drag-and-drop are auto-downscaled (v2.1.128) — earlier
+  versions rejected images outright.
+
+### Fixed
+
+- VS Code extension activation on Windows (v2.1.131).
+- Mantle endpoint authentication (v2.1.131).
+- 1-hour prompt-cache TTL no longer truncated to 5 minutes (v2.1.129).
+- Crash on stdin payloads larger than 10 MB (v2.1.128).
+
+### Notes for translation maintainers
+
+The `vi/`, `zh/`, `uk/`, and `ja/` localized trees are community-maintained
+and may lag the English source. Contributors syncing translations should diff
+against the English files updated in this release.
+
 ## [v2.1.126] — 2026-05-02
 
 ### Synced to Claude Code v2.1.126

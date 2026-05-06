@@ -194,6 +194,13 @@ sequenceDiagram
     Claude->>User: ✅ MCP connected!
 ```
 
+### `/mcp` command
+
+Type `/mcp` inside a session to list connected servers, trigger OAuth flows, and inspect connection state.
+
+- Since **v2.1.121**, MCP retries the initial connection up to 3 times on transient errors.
+- Since **v2.1.128**, `/mcp` displays the **tool count** for each connected server and visually flags servers reporting **0 tools** so misconfigured servers stand out at a glance.
+
 ## MCP Tool Search
 
 When MCP tool descriptions exceed 10% of the context window, Claude Code automatically enables tool search to efficiently select the right tools without overwhelming the model context.
@@ -1132,8 +1139,8 @@ export GITHUB_TOKEN="your_token"
 
 ---
 
-**Last Updated**: May 2, 2026
-**Claude Code Version**: 2.1.126
+**Last Updated**: May 6, 2026
+**Claude Code Version**: 2.1.131
 **Sources**:
 - https://code.claude.com/docs/en/mcp
 - https://code.claude.com/docs/en/changelog

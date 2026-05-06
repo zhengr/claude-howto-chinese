@@ -56,7 +56,7 @@ The older JavaScript bundle is still produced for Windows and for environments t
 | `claude remote-control` | Start Remote Control server | `claude remote-control` |
 | `claude plugin` | Manage plugins (install, enable, disable) | `claude plugin install my-plugin` |
 | `claude plugin tag <version>` | Create a release git tag for a plugin with version validation (v2.1.118+) | `claude plugin tag v0.3.0` |
-| `claude install [version]` | Install a specific native-binary version. Accepts `stable`, `latest`, or an explicit version string | `claude install 2.1.126` |
+| `claude install [version]` | Install a specific native-binary version. Accepts `stable`, `latest`, or an explicit version string | `claude install 2.1.131` |
 | `claude project purge [path]` | Delete all local Claude Code state for a project (transcripts, tasks, debug logs, file-edit history, prompt history, and `~/.claude.json` entry). Omit `[path]` for an interactive picker. Flags: `--dry-run` to preview, `-y/--yes` to skip confirmation, `-i/--interactive` to confirm each item, `--all` for every project (v2.1.126+) | `claude project purge ~/work/repo --dry-run` |
 | `claude plugin prune` | Remove orphaned auto-installed plugin dependencies (parent plugin gone). `plugin uninstall --prune` does the same cascade after uninstalling a target (v2.1.121+) | `claude plugin prune` |
 | `claude ultrareview [target]` | Run `/ultrareview` non-interactively. Prints findings to stdout, exits 0 on success / 1 on failure. Use `--json` for raw payload, `--timeout <minutes>` to override the 30-minute default (v2.1.120+) | `claude ultrareview 1234 --json` |
@@ -150,7 +150,7 @@ claude -p --model opus --fallback-model sonnet "analyze architecture"
 claude --model opusplan "design and implement the caching layer"
 ```
 
-> **Gateway model discovery (v2.1.126+)**: When `ANTHROPIC_BASE_URL` points at an Anthropic-compatible gateway, `/model` populates its picker from the gateway's `/v1/models` endpoint instead of the hard-coded list — useful for self-hosted proxies that expose a different model lineup.
+> **Gateway model discovery (v2.1.129+, opt-in)**: When `ANTHROPIC_BASE_URL` points at an Anthropic-compatible gateway, set `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` to populate `/model` from the gateway's `/v1/models` endpoint. Without the env var, `/model` falls back to the built-in static list. The flag is opt-in (changed in v2.1.129) because the discovery call can surface models a user may not be entitled to use; v2.1.126 made it implicit and that behavior was reverted.
 
 ## System Prompt Customization
 
@@ -793,6 +793,9 @@ The "ultrathink" keyword in prompts activates deep reasoning. The `max` effort l
 | `OTEL_LOG_TOOL_DETAILS` | Set to `1` to unredact custom and MCP command names in OpenTelemetry events (v2.1.117+). Redaction remains the default. |
 | `ANTHROPIC_BEDROCK_SERVICE_TIER` | Selects the Bedrock service tier: `default`, `flex`, or `priority` (v2.1.122+) |
 | `AI_AGENT` | Set automatically on subprocesses so external CLIs (e.g., `gh`) can attribute traffic to Claude Code (v2.1.120+) |
+| `CLAUDE_CODE_FORCE_SYNC_OUTPUT` | Set to `1` to force synchronous output for terminals where auto-detection misses (e.g., Emacs `eat`) (v2.1.129+) |
+| `CLAUDE_CODE_PACKAGE_MANAGER_AUTO_UPDATE` | Set to `1` to enable background upgrades for Homebrew/WinGet installs (which normally do not auto-update) (v2.1.129+) |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | Set to `1` to opt in to gateway `/v1/models` discovery when `ANTHROPIC_BASE_URL` is set. Without it, `/model` shows the built-in static list (v2.1.129+) |
 
 > **`ENABLE_TOOL_SEARCH` on Vertex AI (v2.1.119+)**: Tool search is **disabled by default on Google Cloud Vertex AI** deployments. Users who want the tool-search capability on Vertex must explicitly opt in with `export ENABLE_TOOL_SEARCH=true`. On direct Anthropic API it remains enabled by default.
 
@@ -900,8 +903,8 @@ claude -p --output-format json "query"
 
 ---
 
-**Last Updated**: May 2, 2026
-**Claude Code Version**: 2.1.126
+**Last Updated**: May 6, 2026
+**Claude Code Version**: 2.1.131
 **Sources**:
 - https://code.claude.com/docs/en/cli-reference
 - https://code.claude.com/docs/en/settings
@@ -911,5 +914,5 @@ claude -p --output-format json "query"
 - https://github.com/anthropics/claude-code/releases/tag/v2.1.116
 - https://github.com/anthropics/claude-code/releases/tag/v2.1.117
 - https://github.com/anthropics/claude-code/releases/tag/v2.1.118
-- https://github.com/anthropics/claude-code/releases/tag/v2.1.126
+- https://github.com/anthropics/claude-code/releases/tag/v2.1.131
 **Compatible Models**: Claude Sonnet 4.6, Claude Opus 4.7, Claude Haiku 4.5

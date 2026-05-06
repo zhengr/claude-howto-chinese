@@ -28,7 +28,7 @@ Built-in commands are shortcuts for common actions. There are **60+ built-in com
 | `/btw <question>` | Ask an ephemeral side question while Claude is working on the main task; doesn't pollute the main conversation context |
 | `/chrome` | Configure Chrome browser integration |
 | `/clear` | Clear conversation (aliases: `/reset`, `/new`) |
-| `/color [color\|default]` | Set prompt bar color |
+| `/color [color\|default]` | Set prompt bar color. Bare `/color` (no args) picks a random session color (v2.1.128+); pass a color name or hex to set explicitly. |
 | `/compact [instructions]` | Compact conversation with optional focus instructions |
 | `/config` | Open Settings (alias: `/settings`) |
 | `/context` | Visualize context usage as colored grid |
@@ -601,8 +601,8 @@ If both exist with the same name, the **skill takes precedence**. Remove one or 
 
 ---
 
-**Last Updated**: May 2, 2026
-**Claude Code Version**: 2.1.126
+**Last Updated**: May 6, 2026
+**Claude Code Version**: 2.1.131
 **Sources**:
 - https://code.claude.com/docs/en/slash-commands
 - https://code.claude.com/docs/en/interactive-mode

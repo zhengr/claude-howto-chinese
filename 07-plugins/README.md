@@ -688,6 +688,12 @@ claude plugin install plugin-name@marketplace-name
 # CLI flag for local testing (repeatable for multiple plugins)
 claude --plugin-dir ./path/to/plugin
 claude --plugin-dir ./plugin-a --plugin-dir ./plugin-b
+
+# --plugin-dir also accepts a .zip archive path (v2.1.128+)
+claude --plugin-dir ./my-plugin.zip
+
+# Fetch a plugin .zip archive from a URL for the current session (v2.1.129+, repeatable)
+claude --plugin-url https://example.com/releases/my-plugin-0.3.0.zip
 ```
 
 ### From Git Repository
@@ -760,6 +766,12 @@ Before publishing, test your plugin locally using the `--plugin-dir` CLI flag (r
 ```bash
 claude --plugin-dir ./my-plugin
 claude --plugin-dir ./my-plugin --plugin-dir ./another-plugin
+
+# --plugin-dir accepts .zip archives in addition to directories (v2.1.128+)
+claude --plugin-dir ./my-plugin.zip
+
+# --plugin-url fetches a plugin .zip from a URL for this session (v2.1.129+, repeatable)
+claude --plugin-url https://example.com/releases/my-plugin-0.3.0.zip
 ```
 
 This launches Claude Code with your plugin loaded, allowing you to:
@@ -1037,12 +1049,12 @@ The following Claude Code features work together with plugins:
 
 ---
 
-**Last Updated**: May 2, 2026
-**Claude Code Version**: 2.1.126
+**Last Updated**: May 6, 2026
+**Claude Code Version**: 2.1.131
 **Sources**:
 - https://code.claude.com/docs/en/plugins
 - https://code.claude.com/docs/en/plugin-marketplaces
 - https://github.com/anthropics/claude-code/releases/tag/v2.1.117
 - https://github.com/anthropics/claude-code/releases/tag/v2.1.118
-- https://github.com/anthropics/claude-code/releases/tag/v2.1.126
+- https://github.com/anthropics/claude-code/releases/tag/v2.1.131
 **Compatible Models**: Claude Sonnet 4.6, Claude Opus 4.7, Claude Haiku 4.5

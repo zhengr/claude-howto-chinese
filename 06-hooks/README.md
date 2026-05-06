@@ -1366,11 +1366,11 @@ Edit `~/.claude/settings.json` or `.claude/settings.json` with the hook configur
 
 ---
 
-**Last Updated**: May 2, 2026
-**Claude Code Version**: 2.1.126
+**Last Updated**: May 6, 2026
+**Claude Code Version**: 2.1.131
 **Sources**:
 - https://code.claude.com/docs/en/hooks
 - https://code.claude.com/docs/en/changelog
 - https://github.com/anthropics/claude-code/releases/tag/v2.1.118
-- https://github.com/anthropics/claude-code/releases/tag/v2.1.126
+- https://github.com/anthropics/claude-code/releases/tag/v2.1.131
 **Compatible Models**: Claude Sonnet 4.6, Claude Opus 4.7, Claude Haiku 4.5

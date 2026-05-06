@@ -7,7 +7,7 @@
 
 > Quick reference guide to all Claude Code features: commands, agents, skills, plugins, and hooks.
 
-**Navigation**: [Commands](#slash-commands) | [Permission Modes](#permission-modes) | [Subagents](#subagents) | [Skills](#skills) | [Plugins](#plugins) | [MCP Servers](#mcp-servers) | [Hooks](#hooks) | [Memory](#memory-files) | [New Features](#new-features-april-2026)
+**Navigation**: [Commands](#slash-commands) | [Permission Modes](#permission-modes) | [Subagents](#subagents) | [Skills](#skills) | [Plugins](#plugins) | [MCP Servers](#mcp-servers) | [Hooks](#hooks) | [Memory](#memory-files) | [New Features](#new-features-may-2026)
 
 ---
 
@@ -17,12 +17,12 @@
 |---------|----------|----------|-------|-----------|
 | **Slash Commands** | 60+ | 8 | 68+ | [01-slash-commands/](01-slash-commands/) |
 | **Subagents** | 6 | 11 | 17 | [04-subagents/](04-subagents/) |
-| **Skills** | 5 bundled | 4 | 9 | [03-skills/](03-skills/) |
+| **Skills** | 5 bundled | 6 | 11 | [03-skills/](03-skills/) |
 | **Plugins** | - | 3 | 3 | [07-plugins/](07-plugins/) |
 | **MCP Servers** | 1 | 8 | 9 | [05-mcp/](05-mcp/) |
 | **Hooks** | 28 events | 8 | 8 | [06-hooks/](06-hooks/) |
 | **Memory** | 7 types | 3 | 3 | [02-memory/](02-memory/) |
-| **Total** | **99** | **45** | **119** | |
+| **Total** | **99** | **47** | **121** | |
 
 ---
 
@@ -423,7 +423,7 @@ Persistent context loaded automatically across sessions.
 | **Project Rules** | `.claude/rules/` | Project (team) | Modular project rules |
 | **User** | `~/.claude/CLAUDE.md` | User (personal) | Personal preferences |
 | **User Rules** | `~/.claude/rules/` | User (personal) | Modular personal rules |
-| **Local** | `./CLAUDE.local.md` | Local (git-ignored) | Machine-specific overrides (not in official docs as of March 2026; may be legacy) |
+| **Local** | `./CLAUDE.local.md` | Local (git-ignored) | Machine-specific local overrides (gitignored). Documented at https://code.claude.com/docs/en/memory as a supported per-developer override file. |
 | **Auto Memory** | Automatic | Session | Auto-captured insights and corrections |
 
 > **Scope**: `Organization` = managed by admins, `Project` = shared with team via git, `User` = personal preferences, `Local` = not committed, `Session` = auto-managed
@@ -438,7 +438,7 @@ cp 02-memory/personal-CLAUDE.md ~/.claude/CLAUDE.md
 
 ---
 
-## New Features (April 2026)
+## New Features (May 2026)
 
 | Feature | Description | How to Use |
 |---------|-------------|------------|
@@ -530,8 +530,8 @@ chmod +x ~/.claude/hooks/*.sh
 
 ---
 
-**Last Updated**: May 2, 2026
-**Claude Code Version**: 2.1.126
+**Last Updated**: May 6, 2026
+**Claude Code Version**: 2.1.131
 **Sources**:
 - https://code.claude.com/docs/en/overview
 - https://code.claude.com/docs/en/commands

@@ -97,7 +97,7 @@ graph TD
 
 | Step | Feature | Complexity | Time | Level | Dependencies | Why Learn This | Key Benefits |
 |------|---------|-----------|------|-------|--------------|----------------|--------------|
-| **1** | [Slash Commands](01-slash-commands/) | ⭐ Beginner | 30 min | Level 1 | None | Quick productivity wins (55+ built-in + 5 bundled skills) | Instant automation, team standards |
+| **1** | [Slash Commands](01-slash-commands/) | ⭐ Beginner | 30 min | Level 1 | None | Quick productivity wins (60+ built-in + 5 bundled skills) | Instant automation, team standards |
 | **2** | [Memory](02-memory/) | ⭐⭐ Beginner+ | 45 min | Level 1 | None | Essential for all features | Persistent context, preferences |
 | **3** | [Checkpoints](08-checkpoints/) | ⭐⭐ Intermediate | 45 min | Level 1 | Session management | Safe exploration | Experimentation, recovery |
 | **4** | [CLI Basics](10-cli/) | ⭐⭐ Beginner+ | 30 min | Level 1 | None | Core CLI usage | Interactive & print mode |
@@ -738,12 +738,12 @@ Once you've completed all milestones:
 
 ---
 
-**Last Updated**: May 2, 2026
-**Claude Code Version**: 2.1.126
+**Last Updated**: May 6, 2026
+**Claude Code Version**: 2.1.131
 **Sources**:
 - https://code.claude.com/docs/en/overview
 - https://code.claude.com/docs/en/hooks
-- https://github.com/anthropics/claude-code/releases/tag/v2.1.126
+- https://github.com/anthropics/claude-code/releases/tag/v2.1.131
 **Compatible Models**: Claude Sonnet 4.6, Claude Opus 4.7, Claude Haiku 4.5
 **Maintained by**: Claude How-To Contributors
 **License**: Educational purposes, free to use and adapt

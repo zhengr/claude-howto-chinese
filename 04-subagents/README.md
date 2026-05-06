@@ -1217,11 +1217,11 @@ graph TD
 
 ---
 
-**Last Updated**: May 2, 2026
-**Claude Code Version**: 2.1.126
+**Last Updated**: May 6, 2026
+**Claude Code Version**: 2.1.131
 **Sources**:
 - https://code.claude.com/docs/en/sub-agents
 - https://code.claude.com/docs/en/agent-teams
 - https://github.com/anthropics/claude-code/releases/tag/v2.1.117
-- https://github.com/anthropics/claude-code/releases/tag/v2.1.126
+- https://github.com/anthropics/claude-code/releases/tag/v2.1.131
 **Compatible Models**: Claude Sonnet 4.6, Claude Opus 4.7, Claude Haiku 4.5

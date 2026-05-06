@@ -113,7 +113,7 @@ claude -r "session"    # Resume session by name/ID
 
 | Feature | Install Path | Usage |
 |---------|-------------|-------|
-| **Slash Commands (55+)** | `.claude/commands/*.md` | `/command-name` |
+| **Slash Commands (60+)** | `.claude/commands/*.md` | `/command-name` |
 | **Memory** | `./CLAUDE.md` | Auto-loaded |
 | **Skills** | `.claude/skills/*/SKILL.md` | Auto-invoked |
 | **Subagents** | `.claude/agents/*.md` | Auto-delegated |
@@ -439,7 +439,7 @@ echo $GITHUB_TOKEN
 
 | Need | Use This | Example |
 |------|----------|---------|
-| Quick shortcut | Slash Command (55+) | `01-slash-commands/optimize.md` |
+| Quick shortcut | Slash Command (60+) | `01-slash-commands/optimize.md` |
 | Team standards | Memory | `02-memory/project-CLAUDE.md` |
 | Auto workflow | Skill | `03-skills/code-review/` |
 | Specialized task | Subagent | `04-subagents/code-reviewer.md` |
@@ -457,7 +457,6 @@ echo $GITHUB_TOKEN
 
 - **Main Guide**: `README.md`
 - **Complete Index**: `INDEX.md`
-- **Summary**: `EXAMPLES_SUMMARY.md`
 - **Original Guide**: `claude_concepts_guide.md`
 
 ---
@@ -505,11 +504,11 @@ Getting started checklist:
 **This Card**: Keep it handy for quick reference!
 
 ---
-**Last Updated**: May 2, 2026
-**Claude Code Version**: 2.1.126
+**Last Updated**: May 6, 2026
+**Claude Code Version**: 2.1.131
 **Sources**:
 - https://code.claude.com/docs/en/overview
 - https://code.claude.com/docs/en/hooks
 - https://code.claude.com/docs/en/commands
-- https://github.com/anthropics/claude-code/releases/tag/v2.1.126
+- https://github.com/anthropics/claude-code/releases/tag/v2.1.131
 **Compatible Models**: Claude Sonnet 4.6, Claude Opus 4.7, Claude Haiku 4.5
