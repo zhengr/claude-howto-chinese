@@ -531,3 +531,9 @@ Proceed with this plan? (yes/no/modify)
 5. **Include rollback** strategies
 6. **Add success** criteria
 7. **Plan for testing** at each phase
+
+---
+**Last Updated**: May 9, 2026
+**Claude Code Version**: 2.1.138
+**Sources**:
+- https://code.claude.com/docs/en/changelog

@@ -101,10 +101,10 @@
 ### Q2
 - **Category**: practical
 - **Question**: How do you quickly add a new rule to memory during a conversation?
-- **Options**: A) Type `/memory add "rule text"` | B) Prefix your message with `#` (e.g., `# always use TypeScript`) | C) Type `/rule "rule text"` | D) Use `@add-memory "rule text"`
-- **Correct**: B
-- **Explanation**: The `#` prefix pattern allows quick single-rule additions during conversation. Claude will ask which memory level to save it to.
-- **Review**: Quick memory updates section
+- **Options**: A) Use the `/memory` slash command or ask conversationally | B) Prefix your message with `#` (e.g., `# always use TypeScript`) | C) Type `/rule "rule text"` | D) Use `@add-memory "rule text"`
+- **Correct**: A
+- **Explanation**: The recommended ways to add memory are the `/memory` command (opens memory files in your editor) or asking Claude conversationally (e.g., "remember that we always use TypeScript strict mode"). The `#` prefix was discontinued and no longer works.
+- **Review**: Quick memory updates section in README
 
 ### Q3
 - **Category**: conceptual
@@ -209,9 +209,9 @@
 ### Q5
 - **Category**: conceptual
 - **Question**: What is the approximate context budget allocated to skill metadata (Level 1)?
-- **Options**: A) 0.5% of context window | B) 2% of context window | C) 5% of context window | D) 10% of context window
+- **Options**: A) 0.5% of context window | B) 1% of context window | C) 5% of context window | D) 10% of context window
 - **Correct**: B
-- **Explanation**: Skill metadata occupies about 2% of the context window (fallback: 16,000 characters). This is configurable with `SLASH_COMMAND_TOOL_CHAR_BUDGET`.
+- **Explanation**: Skill metadata occupies about 1% of the context window (fallback: 8,000 characters). This is configurable with `SLASH_COMMAND_TOOL_CHAR_BUDGET`.
 - **Review**: Context budget section
 
 ### Q6
@@ -269,9 +269,9 @@
 ### Q2
 - **Category**: practical
 - **Question**: What is the priority order for agent definitions?
-- **Options**: A) Project > User > CLI | B) CLI > User > Project | C) User > Project > CLI | D) They all have equal priority
+- **Options**: A) Project > User > CLI | B) CLI > Project > User | C) User > Project > CLI | D) They all have equal priority
 - **Correct**: B
-- **Explanation**: CLI-defined agents (`--agents` flag) override User-level (`~/.claude/agents/`), which override Project-level (`.claude/agents/`).
+- **Explanation**: CLI-defined agents (`--agents` flag) override Project-level (`.claude/agents/`), which override User-level (`~/.claude/agents/`).
 - **Review**: File locations section
 
 ### Q3
@@ -704,18 +704,18 @@
 
 ### Q4
 - **Category**: practical
-- **Question**: How do you toggle extended thinking during a session?
-- **Options**: A) Type `/think` | B) Press `Option+T` (macOS) or `Alt+T` | C) Use `--thinking` flag | D) It's always enabled and cannot be toggled
+- **Question**: How do you toggle extended thinking on or off during a session?
+- **Options**: A) Type `/effort max` | B) Press `Option+T` (macOS) or `Alt+T` | C) Include "ultrathink" in prompt | D) It's always enabled and cannot be toggled
 - **Correct**: B
-- **Explanation**: Option+T (macOS) or Alt+T toggles extended thinking. It's enabled by default for all models. Opus 4.6 supports adaptive effort levels.
+- **Explanation**: Option+T (macOS) or Alt+T toggles extended thinking on/off for the session. (`Ctrl+O` toggles verbose mode to show/hide the reasoning text.) For one-off deep reasoning, include "ultrathink" in your prompt; for session-level control, use `/effort` command.
 - **Review**: Extended Thinking section
 
 ### Q5
 - **Category**: conceptual
-- **Question**: Are "think" or "ultrathink" special keywords that activate enhanced thinking?
-- **Options**: A) Yes, they activate deeper reasoning | B) No, they are treated as regular prompt text with no special behavior | C) Only "ultrathink" is special | D) They work only with Opus
-- **Correct**: B
-- **Explanation**: The documentation explicitly states these are regular prompt instructions, not special activation keywords. Extended thinking is controlled via Alt+T toggle and environment variables.
+- **Question**: Does the "ultrathink" keyword trigger deep reasoning?
+- **Options**: A) Yes, it triggers deep reasoning for one response without changing session settings | B) No, it's treated as regular prompt text | C) Yes, but only on Opus 4.6 | D) Yes, and it permanently changes the effort level
+- **Correct**: A
+- **Explanation**: Including "ultrathink" in your prompt adds an in-context instruction for the model to reason more on that turn. It does not change the effort level sent to the API—use `/effort max` for session-level deep reasoning.
 - **Review**: Extended Thinking section
 
 ### Q6
@@ -813,9 +813,9 @@
 ### Q7
 - **Category**: conceptual
 - **Question**: What is the agent definition priority order?
-- **Options**: A) Project > User > CLI | B) CLI > User > Project | C) User > CLI > Project | D) All are equal priority
+- **Options**: A) Project > User > CLI | B) CLI > Project > User | C) User > CLI > Project | D) All are equal priority
 - **Correct**: B
-- **Explanation**: CLI-defined agents (--agents flag) have highest priority, then User-level (~/.claude/agents/), then Project-level (.claude/agents/).
+- **Explanation**: CLI-defined agents (--agents flag) have highest priority, then Project-level (.claude/agents/), then User-level (~/.claude/agents/).
 - **Review**: Agents configuration section
 
 ### Q8

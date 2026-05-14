@@ -105,14 +105,6 @@ Server-Sent Events transport is deprecated in favor of `http` but still supporte
 claude mcp add --transport sse legacy-server https://example.com/sse
 ```
 
-### WebSocket Transport
-
-WebSocket transport for persistent bidirectional connections:
-
-```bash
-claude mcp add --transport ws realtime-server wss://example.com/mcp
-```
-
 ### Windows-Specific Note
 
 On native Windows (not WSL), use `cmd /c` for npx commands:
@@ -172,6 +164,8 @@ MCP servers configured in your Claude.ai account are automatically available in 
 
 Claude.ai MCP connectors are also available in `--print` mode (v2.1.83+), enabling non-interactive and scripted usage.
 
+> **Startup note (v2.1.117+):** Concurrent connect is the default when both local and claude.ai MCP servers are configured (previously serial), reducing startup latency when multiple servers are in use.
+
 To disable Claude.ai MCP servers in Claude Code, set the `ENABLE_CLAUDEAI_MCP_SERVERS` environment variable to `false`:
 
 ```bash
@@ -200,6 +194,13 @@ sequenceDiagram
     Claude->>User: ✅ MCP connected!
 ```
 
+### `/mcp` command
+
+Type `/mcp` inside a session to list connected servers, trigger OAuth flows, and inspect connection state.
+
+- Since **v2.1.121**, MCP retries the initial connection up to 3 times on transient errors.
+- Since **v2.1.128**, `/mcp` displays the **tool count** for each connected server and visually flags servers reporting **0 tools** so misconfigured servers stand out at a glance.
+
 ## MCP Tool Search
 
 When MCP tool descriptions exceed 10% of the context window, Claude Code automatically enables tool search to efficiently select the right tools without overwhelming the model context.
@@ -213,9 +214,34 @@ When MCP tool descriptions exceed 10% of the context window, Claude Code automat
 
 > **Note:** Tool search requires Sonnet 4 or later, or Opus 4 or later. Haiku models are not supported for tool search.
 
+### Bypassing Tool Search per Server (v2.1.121+)
+
+If a particular MCP server's tools are needed on every turn, mark its
+configuration with `"alwaysLoad": true` to skip tool-search deferral and
+keep its tools always available:
+
+```json
+{
+  "mcpServers": {
+    "always-on-tool": {
+      "command": "node",
+      "args": ["./tools/always.js"],
+      "alwaysLoad": true
+    }
+  }
+}
+```
+
+Use sparingly — every always-loaded tool consumes context that could
+otherwise be used for tool search to surface a more relevant tool.
+
 ## Dynamic Tool Updates
 
 Claude Code supports MCP `list_changed` notifications. When an MCP server dynamically adds, removes, or modifies its available tools, Claude Code receives the update and adjusts its tool list automatically -- no reconnection or restart required.
+
+## MCP Apps
+
+MCP Apps is the first official MCP extension, enabling MCP tool calls to return interactive UI components that render directly in the chat interface. Instead of plain text responses, MCP servers can deliver rich dashboards, forms, data visualizations, and multi-step workflows -- all displayed inline without leaving the conversation.
 
 ## MCP Elicitation
 
@@ -238,6 +264,13 @@ For example, if a server named `github` exposes a prompt called `review`, you ca
 ## Server Deduplication
 
 When the same MCP server is defined at multiple scopes (local, project, user), the local configuration takes precedence. This allows you to override project-level or user-level MCP settings with local customizations without conflicts.
+
+## Recent Lifecycle Fixes (v2.1.136)
+
+Two long-standing MCP lifecycle bugs were fixed in v2.1.136 — worth upgrading for if you run multi-server setups:
+
+- **MCP servers persist across `/clear`**: Servers configured via `.mcp.json`, plugins, or claude.ai connectors no longer disappear after `/clear` in VS Code, JetBrains, or the Agent SDK. Earlier versions silently dropped them and required a restart.
+- **OAuth refresh-token concurrent-refresh fix**: Multi-server OAuth setups no longer lose refresh tokens when several servers race to refresh simultaneously. This eliminates the "every morning I have to re-auth" pattern that affected setups with multiple OAuth-protected MCP servers.
 
 ## MCP Resources via @ Mentions
 
@@ -1110,3 +1143,13 @@ export GITHUB_TOKEN="your_token"
 - [Code Execution with MCP](https://www.anthropic.com/engineering/code-execution-with-mcp) — Anthropic's engineering blog on solving context bloat
 - [Claude Code CLI Reference](https://code.claude.com/docs/en/cli-reference)
 - [Claude API Documentation](https://docs.anthropic.com)
+
+---
+
+**Last Updated**: May 9, 2026
+**Claude Code Version**: 2.1.138
+**Sources**:
+- https://code.claude.com/docs/en/mcp
+- https://code.claude.com/docs/en/changelog
+- https://github.com/anthropics/claude-code/releases/tag/v2.1.117
+**Compatible Models**: Claude Sonnet 4.6, Claude Opus 4.7, Claude Haiku 4.5

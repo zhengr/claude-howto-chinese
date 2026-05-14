@@ -9,12 +9,12 @@ Hooks are automated scripts that execute in response to specific events during C
 
 ## Overview
 
-Hooks are automated actions (shell commands, HTTP webhooks, LLM prompts, or subagent evaluations) that execute automatically when specific events occur in Claude Code. They receive JSON input and communicate results via exit codes and JSON output.
+Hooks are automated actions (shell commands, HTTP webhooks, LLM prompts, MCP tool calls, or subagent evaluations) that execute automatically when specific events occur in Claude Code. They receive JSON input and communicate results via exit codes and JSON output.
 
 **Key features:**
 - Event-driven automation
 - JSON-based input/output
-- Support for command, prompt, HTTP, and agent hook types
+- Support for `command`, `http`, `mcp_tool`, `prompt`, and `agent` hook types
 - Pattern matching for tool-specific hooks
 
 ## Configuration
@@ -55,7 +55,7 @@ Hooks are configured in settings files with a specific structure:
 |-------|-------------|---------|
 | `matcher` | Pattern to match tool names (case-sensitive) | `"Write"`, `"Edit\|Write"`, `"*"` |
 | `hooks` | Array of hook definitions | `[{ "type": "command", ... }]` |
-| `type` | Hook type: `"command"` (bash), `"prompt"` (LLM), `"http"` (webhook), or `"agent"` (subagent) | `"command"` |
+| `type` | Hook type: `"command"` (bash), `"prompt"` (LLM), `"http"` (webhook), `"mcp_tool"` (MCP tool invocation, v2.1.118+), or `"agent"` (subagent) | `"command"` |
 | `command` | Shell command to execute | `"$CLAUDE_PROJECT_DIR/.claude/hooks/format.sh"` |
 | `timeout` | Optional timeout in seconds (default 60) | `30` |
 | `once` | If `true`, run the hook only once per session | `true` |
@@ -69,9 +69,17 @@ Hooks are configured in settings files with a specific structure:
 | Wildcard | Matches all tools | `"*"` or `""` |
 | MCP tools | Server and tool pattern | `"mcp__memory__.*"` |
 
+**InstructionsLoaded matcher values:**
+
+| Matcher Value | Description |
+|---------------|-------------|
+| `session_start` | Instructions loaded at session startup |
+| `nested_traversal` | Instructions loaded during nested directory traversal |
+| `path_glob_match` | Instructions loaded via path glob pattern matching |
+
 ## Hook Types
 
-Claude Code supports four hook types:
+Claude Code supports five hook types:
 
 ### Command Hooks
 
@@ -123,6 +131,30 @@ LLM-evaluated prompts where the hook content is a prompt that Claude evaluates. 
 
 The LLM evaluates the prompt and returns a structured decision (see [Prompt-Based Hooks](#prompt-based-hooks) for details).
 
+### MCP Tool Hooks
+
+> Added in v2.1.118.
+
+The `mcp_tool` type invokes a configured MCP tool directly; configuration references the MCP server and tool name rather than a shell command or URL. This is useful when the validation or reaction logic already lives in an MCP server you have configured.
+
+```json
+{
+  "matcher": "Edit",
+  "hooks": [{
+    "type": "mcp_tool",
+    "server": "my-mcp-server",
+    "tool": "validate_edit"
+  }]
+}
+```
+
+**Key properties:**
+- `"type": "mcp_tool"` -- identifies this as an MCP tool hook
+- `"server"` -- name of the configured MCP server
+- `"tool"` -- the tool name on that server to invoke
+
+The hook input (tool name, tool input, session context) is passed as the MCP tool's arguments. See [MCP server setup](../05-mcp/README.md) for configuring MCP servers.
+
 ### Agent Hooks
 
 Subagent-based verification hooks that spawn a dedicated agent to evaluate conditions or perform complex checks. Unlike prompt hooks (single-turn LLM evaluation), agent hooks can use tools and perform multi-step reasoning.
@@ -143,17 +175,21 @@ Subagent-based verification hooks that spawn a dedicated agent to evaluate condi
 
 ## Hook Events
 
-Claude Code supports **25 hook events**:
+Claude Code supports **29 hook events**:
 
 | Event | When Triggered | Matcher Input | Can Block | Common Use |
 |-------|---------------|---------------|-----------|------------|
 | **SessionStart** | Session begins/resumes/clear/compact | startup/resume/clear/compact | No | Environment setup |
+| **Setup** | Initial environment setup (one-time per session) | (none) | No | Provision tooling, install deps |
 | **InstructionsLoaded** | After CLAUDE.md or rules file loaded | (none) | No | Modify/filter instructions |
 | **UserPromptSubmit** | User submits prompt | (none) | Yes | Validate prompts |
+| **UserPromptExpansion** | User prompt is expanded (e.g., `@` mentions, slash commands resolved) | (none) | Yes | Transform or inspect expanded prompt |
 | **PreToolUse** | Before tool execution | Tool name | Yes (allow/deny/ask) | Validate, modify inputs |
 | **PermissionRequest** | Permission dialog shown | Tool name | Yes | Auto-approve/deny |
+| **PermissionDenied** | User denies a permission prompt | Tool name | No | Logging, analytics, policy enforcement |
 | **PostToolUse** | After tool succeeds | Tool name | No | Add context, feedback |
 | **PostToolUseFailure** | Tool execution fails | Tool name | No | Error handling, logging |
+| **PostToolBatch** | After a batch of tool uses completes | (none) | No | Aggregate reporting, batched validation |
 | **Notification** | Notification sent | Notification type | No | Custom notifications |
 | **SubagentStart** | Subagent spawned | Agent type name | No | Subagent setup |
 | **SubagentStop** | Subagent finishes | Agent type name | Yes | Subagent validation |
@@ -172,6 +208,8 @@ Claude Code supports **25 hook events**:
 | **Elicitation** | MCP server requests user input | (none) | Yes | Input validation |
 | **ElicitationResult** | User responds to elicitation | (none) | Yes | Response processing |
 | **SessionEnd** | Session terminates | (none) | No | Cleanup, final logging |
+
+> **PostToolUse duration (v2.1.119):** `PostToolUse` and `PostToolUseFailure` hook inputs now include `duration_ms` — see the [PostToolUse](#posttooluse) section for details.
 
 ### PreToolUse
 
@@ -229,6 +267,12 @@ Runs immediately after tool completion. Use for verification, logging, or provid
 **Output control:**
 - `"block"` decision prompts Claude with feedback
 - `additionalContext`: Context added for Claude
+
+**Additional input fields (v2.1.119):**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `duration_ms` | number | Tool execution time in milliseconds. Excludes time spent in permission prompts and PreToolUse hook execution. Available on both `PostToolUse` and `PostToolUseFailure` hooks. |
 
 ### UserPromptSubmit
 
@@ -437,7 +481,8 @@ All hooks receive JSON input via stdin:
   "tool_use_id": "toolu_01ABC123...",
   "agent_id": "agent-abc123",
   "agent_type": "main",
-  "worktree": "/path/to/worktree"
+  "worktree": "/path/to/worktree",
+  "effort": { "level": "medium" }
 }
 ```
 
@@ -452,6 +497,7 @@ All hooks receive JSON input via stdin:
 | `agent_id` | Identifier of the agent running this hook |
 | `agent_type` | Type of agent (`"main"`, subagent type name, etc.) |
 | `worktree` | Path to the git worktree, if the agent is running in one |
+| `effort.level` | (v2.1.133+) Active effort level: `low`, `medium`, `high`, `xhigh`, or `max` |
 
 ### Exit Codes
 
@@ -480,6 +526,17 @@ All hooks receive JSON input via stdin:
 }
 ```
 
+> **Scope (v2.1.121+):** `hookSpecificOutput.updatedToolOutput` is now honored for **all** tools, not just MCP tools. A `PostToolUse` hook on `Bash`, `Edit`, `Read`, etc. can rewrite the tool's output before Claude sees it — useful for redacting secrets, normalizing diffs, or filtering noisy command output. Example (strip ANSI color codes from a `Bash` output):
+>
+> ```json
+> {
+>   "hookSpecificOutput": {
+>     "hookEventName": "PostToolUse",
+>     "updatedToolOutput": "<plain-text output with ANSI escapes removed>"
+>   }
+> }
+> ```
+
 ## Environment Variables
 
 | Variable | Availability | Description |
@@ -490,6 +547,8 @@ All hooks receive JSON input via stdin:
 | `${CLAUDE_PLUGIN_ROOT}` | Plugin hooks | Path to plugin directory |
 | `${CLAUDE_PLUGIN_DATA}` | Plugin hooks | Path to plugin data directory |
 | `CLAUDE_CODE_SESSIONEND_HOOKS_TIMEOUT_MS` | SessionEnd hooks | Configurable timeout in milliseconds for SessionEnd hooks (overrides default) |
+| `CLAUDE_CODE_SESSION_ID` | Bash tool subprocesses (v2.1.132+) | Session UUID; matches the `session_id` field in hook input JSON. Use to correlate bash logs with hook telemetry. |
+| `CLAUDE_EFFORT` | Bash tool subprocesses (v2.1.133+) | Active effort level (`low`/`medium`/`high`/`xhigh`/`max`); matches `effort.level` in hook input JSON. |
 
 ## Prompt-Based Hooks
 
@@ -922,6 +981,160 @@ python3 09-advanced-features/setup-auto-mode-permissions.py
 - `DROP TABLE`, `kubectl delete`, `terraform destroy`
 - `npm publish`, `curl | bash`, production deploys
 
+### Example 8: Learning Progress Logger (SessionEnd)
+
+Log which modules you studied at the end of each Claude Code session. Progress is stored
+in `~/.claude-howto-progress.json` — outside the repo, so it survives `git pull` without
+being overwritten.
+
+**Why `SessionEnd` and not `Stop`?**
+`Stop` fires after *every* Claude response. `SessionEnd` fires once when the session
+terminates — exactly what you want for an end-of-session diary entry.
+
+**Why `/dev/tty` for input?**
+Hook scripts receive the hook JSON payload via `stdin`, so interactive `read` must use
+`/dev/tty` directly to reach the terminal.
+
+**File:** `06-hooks/session-end.sh`
+
+```bash
+#!/usr/bin/env bash
+# SessionEnd hook: prompts for modules worked on, then appends a session record
+# to ~/.claude-howto-progress.json for persistent learning progress tracking.
+
+PROGRESS_FILE="$HOME/.claude-howto-progress.json"
+
+# Guard: only run inside this repo
+if [[ "$CLAUDE_PROJECT_DIR" != *"claude-howto"* ]] && [[ "$PWD" != *"claude-howto"* ]]; then
+  exit 0
+fi
+
+if [ ! -f "$PROGRESS_FILE" ]; then
+  echo '{"sessions":[]}' > "$PROGRESS_FILE"
+fi
+
+DATE=$(date +"%Y-%m-%d")
+TIME=$(date +"%H:%M")
+
+echo ""
+echo " Which modules did you work on? (e.g. 06,07 or press Enter to skip)"
+echo " 01=Slash  02=Memory  03=Skills  04=Subagents  05=MCP"
+echo " 06=Hooks  07=Plugins 08=Checkpoints 09=Advanced 10=CLI"
+printf " > "
+read -r INPUT </dev/tty
+
+if [ -z "$INPUT" ] || [ "$INPUT" = "skip" ]; then
+  exit 0
+fi
+
+MODULES_JSON=$(echo "$INPUT" | tr ',' '\n' | tr -d ' ' | while read -r m; do
+  case "$m" in
+    01) echo '"01-slash-commands"' ;;
+    02) echo '"02-memory"' ;;
+    03) echo '"03-skills"' ;;
+    04) echo '"04-subagents"' ;;
+    05) echo '"05-mcp"' ;;
+    06) echo '"06-hooks"' ;;
+    07) echo '"07-plugins"' ;;
+    08) echo '"08-checkpoints"' ;;
+    09) echo '"09-advanced-features"' ;;
+    10) echo '"10-cli"' ;;
+    *)  echo "\"$m\"" ;;
+  esac
+done | paste -sd ',' -)
+
+printf " Notes? (optional, press Enter to skip): "
+read -r NOTES </dev/tty
+
+# Pass NOTES as a separate argument so Python handles JSON escaping —
+# avoids broken JSON when notes contain quotes or backslashes.
+python3 - "$PROGRESS_FILE" "$DATE" "$TIME" "$MODULES_JSON" "$NOTES" <<'PYEOF'
+import sys, json
+
+path, date, time_str, modules_raw, notes = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5]
+
+new_session = {
+    "date": date,
+    "time": time_str,
+    "modules": json.loads(f"[{modules_raw}]") if modules_raw else [],
+    "notes": notes,
+}
+
+with open(path, 'r') as f:
+    data = json.load(f)
+
+data.setdefault('sessions', []).append(new_session)
+
+with open(path, 'w') as f:
+    json.dump(data, f, indent=2)
+PYEOF
+
+echo " Saved to $PROGRESS_FILE"
+```
+
+**Install** — copy the script into the project's hook directory so the path in `settings.json` resolves:
+
+```bash
+mkdir -p .claude/hooks
+cp 06-hooks/session-end.sh .claude/hooks/
+chmod +x .claude/hooks/session-end.sh
+```
+
+**Configuration** (in `.claude/settings.json`):
+
+```json
+{
+  "hooks": {
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR/.claude/hooks/session-end.sh\""
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+**Output — `~/.claude-howto-progress.json`:**
+
+```json
+{
+  "sessions": [
+    {
+      "date": "2026-04-18",
+      "time": "14:32",
+      "modules": ["06-hooks", "07-plugins"],
+      "notes": "Installed first hook, tried pre-commit example"
+    }
+  ]
+}
+```
+
+**Key patterns demonstrated:**
+
+| Pattern | Why it matters |
+|---------|----------------|
+| `SessionEnd` event | Fires once on exit — not after every response like `Stop` |
+| `read -r INPUT </dev/tty` | Hooks own `stdin` (JSON payload); use `/dev/tty` for user input |
+| `$CLAUDE_PROJECT_DIR` | Portable path — never hardcode `/Users/yourname/...` |
+| Guard clause at top | Prevents the hook running in unrelated projects if installed globally |
+| Store outside the repo | `~/` path survives `git pull` without overwriting your data |
+
+**Companion: visual progress tracker**
+
+For a full checkbox-based UI covering all 10 modules, open the included tracker in your browser:
+
+```bash
+open local-progress/index.html
+```
+
+Progress is stored in browser `localStorage` (never written to disk inside the repo).
+Use the **Export** button to save a snapshot as JSON, and **Import** to restore it.
+
 ## Plugin Hooks
 
 Plugins can include hooks in their `hooks/hooks.json` file:
@@ -989,6 +1202,7 @@ MCP tools follow the pattern `mcp__<server>__<tool>`:
 - **Workspace trust required:** The `statusLine` and `fileSuggestion` hook output commands now require workspace trust acceptance before they take effect.
 - **HTTP hooks and environment variables:** HTTP hooks require an explicit `allowedEnvVars` list to use environment variable interpolation in URLs. This prevents accidental leakage of sensitive environment variables to remote endpoints.
 - **Managed settings hierarchy:** The `disableAllHooks` setting now respects the managed settings hierarchy, meaning organization-level settings can enforce hook disablement that individual users cannot override.
+- **PowerShell auto-approve (v2.1.119):** PowerShell tool commands can be auto-approved in permission mode, matching Bash. This brings parity for Windows users running Claude Code with PowerShell-backed shell tools.
 
 ### Best Practices
 
@@ -1154,3 +1368,15 @@ Edit `~/.claude/settings.json` or `.claude/settings.json` with the hook configur
 - **[Official Hooks Documentation](https://code.claude.com/docs/en/hooks)** - Complete hooks reference
 - **[CLI Reference](https://code.claude.com/docs/en/cli-reference)** - Command-line interface documentation
 - **[Memory Guide](../02-memory/)** - Persistent context configuration
+
+---
+
+**Last Updated**: May 9, 2026
+**Claude Code Version**: 2.1.138
+**Sources**:
+- https://code.claude.com/docs/en/hooks
+- https://code.claude.com/docs/en/changelog
+- https://github.com/anthropics/claude-code/releases/tag/v2.1.118
+- https://github.com/anthropics/claude-code/releases/tag/v2.1.131
+- https://github.com/anthropics/claude-code/releases/tag/v2.1.138
+**Compatible Models**: Claude Sonnet 4.6, Claude Opus 4.7, Claude Haiku 4.5

@@ -337,3 +337,10 @@ User: Now let's continue with the approach that worked.
 4. **Don't fear experimentation**: Checkpoints make it safe to try radical changes
 5. **Combine with git**: Use checkpoints for exploration, git for finalized work
 6. **Summarize long sessions**: Use "Summarize from here" to keep conversations manageable
+
+---
+**Last Updated**: May 9, 2026
+**Claude Code Version**: 2.1.138
+**Sources**:
+- https://code.claude.com/docs/en/checkpointing
+- https://code.claude.com/docs/en/changelog

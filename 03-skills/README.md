@@ -66,19 +66,20 @@ This means you can install many Skills without context penalty—Claude only kno
 ```mermaid
 sequenceDiagram
     participant User
-    participant Claude as Claude
-    participant System as System
-    participant Skill as Skill
+    participant Claude
+    participant System
+    participant SkillInst as Skill Instructions
+    participant SkillRes as Skill Resources
 
     User->>Claude: "Review this code for security issues"
     Claude->>System: Check available skills (metadata)
     System-->>Claude: Skill descriptions loaded at startup
     Claude->>Claude: Match request to skill description
-    Claude->>Skill: bash: read code-review/SKILL.md
-    Skill-->>Claude: Instructions loaded into context
+    Claude->>SkillInst: Read code-review/SKILL.md
+    SkillInst-->>Claude: Level 2: Instructions loaded
     Claude->>Claude: Determine: Need templates?
-    Claude->>Skill: bash: read templates/checklist.md
-    Skill-->>Claude: Template loaded
+    Claude->>SkillRes: Read templates/checklist.md
+    SkillRes-->>Claude: Level 3: Template loaded
     Claude->>Claude: Execute skill instructions
     Claude->>User: Comprehensive code review
 ```
@@ -94,13 +95,15 @@ sequenceDiagram
 
 When skills share the same name across levels, higher-priority locations win: **enterprise > personal > project**. Plugin skills use a `plugin-name:skill-name` namespace, so they cannot conflict.
 
+> **Subagent skill discovery (v2.1.133+)**: Subagents now discover project, user, and plugin skills via the Skill tool the same way the main session does. Earlier versions limited subagents to their own embedded set, which meant skill+subagent workflows quietly degraded; from v2.1.133 the same skill catalog is visible to both.
+
 ### Automatic Discovery
 
 **Nested directories**: When you work with files in subdirectories, Claude Code automatically discovers skills from nested `.claude/skills/` directories. For example, if you're editing a file in `packages/frontend/`, Claude Code also looks for skills in `packages/frontend/.claude/skills/`. This supports monorepo setups where packages have their own skills.
 
 **`--add-dir` directories**: Skills from directories added via `--add-dir` are loaded automatically with live change detection. Any edits to skill files in those directories take effect immediately without restarting Claude Code.
 
-**Description budget**: Skill descriptions (Level 1 metadata) are capped at **2% of the context window** (fallback: **16,000 characters**). If you have many skills installed, some may be excluded. Run `/context` to check for warnings. Override the budget with the `SLASH_COMMAND_TOOL_CHAR_BUDGET` environment variable.
+**Description budget**: Skill descriptions (Level 1 metadata) are capped at **1% of the context window** (fallback: **8,000 characters**). If you have many skills installed, descriptions may be shortened. All skill names are always included, but descriptions are trimmed to fit. Front-load the key use case in descriptions. Override the budget with the `SLASH_COMMAND_TOOL_CHAR_BUDGET` environment variable.
 
 ## Creating Custom Skills
 
@@ -149,7 +152,7 @@ disable-model-invocation: true              # Only user can invoke
 user-invocable: false                       # Hide from slash menu
 allowed-tools: Read, Grep, Glob             # Restrict tool access
 model: opus                                 # Specific model to use
-effort: high                                # Effort level override (low, medium, high, max)
+effort: high                                # Effort level override (low, medium, high, xhigh, max)
 context: fork                               # Run in isolated subagent
 agent: Explore                              # Which agent type (with context: fork)
 shell: bash                                 # Shell for commands: bash (default) or powershell
@@ -159,6 +162,7 @@ hooks:                                      # Skill-scoped hooks
       hooks:
         - type: command
           command: "./scripts/validate.sh"
+paths: "src/api/**/*.ts"               # Glob patterns limiting when skill activates
 ---
 ```
 
@@ -171,11 +175,12 @@ hooks:                                      # Skill-scoped hooks
 | `user-invocable` | `false` = hidden from the `/` menu. Only Claude can invoke it automatically. |
 | `allowed-tools` | Comma-separated list of tools the skill may use without permission prompts. |
 | `model` | Model override while the skill is active (e.g., `opus`, `sonnet`). |
-| `effort` | Effort level override while the skill is active: `low`, `medium`, `high`, or `max`. |
+| `effort` | Effort level override while the skill is active: `low`, `medium`, `high`, `xhigh`, or `max`. Available levels depend on the model — `xhigh` is the Claude Code default for Opus 4.7. |
 | `context` | `fork` to run the skill in a forked subagent context with its own context window. |
 | `agent` | Subagent type when `context: fork` (e.g., `Explore`, `Plan`, `general-purpose`). |
-| `shell` | Shell used for `!`command`` substitutions and scripts: `bash` (default) or `powershell`. |
+| `shell` | Shell used for `` !`command` `` substitutions and scripts: `bash` (default) or `powershell`. |
 | `hooks` | Hooks scoped to this skill's lifecycle (same format as global hooks). |
+| `paths` | Glob patterns that limit when the skill is auto-activated. Comma-separated string or YAML list. Same format as path-specific rules. |
 
 ## Skill Content Types
 
@@ -239,6 +244,7 @@ Skills support dynamic values that are resolved before the skill content reaches
 | `$ARGUMENTS[N]` or `$N` | Access specific argument by index (0-based) |
 | `${CLAUDE_SESSION_ID}` | Current session ID |
 | `${CLAUDE_SKILL_DIR}` | Directory containing the skill's SKILL.md file |
+| `${CLAUDE_EFFORT}` | Current effort level (`low`, `medium`, `high`, `xhigh`, or `max`). Useful for branching skill behavior: e.g., `[ "${CLAUDE_EFFORT}" = "max" ] && deep_analysis` (v2.1.120+) |
 | `` !`command` `` | Dynamic context injection — runs a shell command and inlines the output |
 
 **Example:**
@@ -260,7 +266,7 @@ Running `/fix-issue 123` replaces `$ARGUMENTS` with `123`.
 
 ## Injecting Dynamic Context
 
-The `!`command`` syntax runs shell commands before the skill content is sent to Claude:
+The `` !`command` `` syntax runs shell commands before the skill content is sent to Claude:
 
 ```yaml
 ---
@@ -406,7 +412,7 @@ A skill that generates interactive HTML visualizations:
 
 **File:** `~/.claude/skills/codebase-visualizer/SKILL.md`
 
-```yaml
+````yaml
 ---
 name: codebase-visualizer
 description: Generate an interactive collapsible tree visualization of your codebase. Use when exploring a new repo, understanding project structure, or identifying large files.
@@ -433,7 +439,7 @@ This creates `codebase-map.html` and opens it in your default browser.
 - **File sizes**: Displayed next to each file
 - **Colors**: Different colors for different file types
 - **Directory totals**: Shows aggregate size of each folder
-```
+````
 
 The bundled Python script does the heavy lifting while Claude handles orchestration.
 
@@ -595,6 +601,8 @@ ls ~/.claude/skills/
 ls .claude/skills/
 ```
 
+> **Tip (v2.1.121+):** Type to filter the `/skills` interactive menu — useful when many skills are installed.
+
 ### Testing a Skill
 
 Two ways to test:
@@ -642,6 +650,27 @@ Skill(deploy *)
 ```
 
 **Hide individual skills** by adding `disable-model-invocation: true` to their frontmatter.
+
+### Controlling Skill Override Behavior (`skillOverrides`)
+
+When a project skill and a user skill share the same name, project wins by default. The `skillOverrides` setting (v2.1.129+) lets you tune this. Add it to `~/.claude/settings.json` or project `.claude/settings.json`:
+
+```json
+{
+  "skillOverrides": "name-only"
+}
+```
+
+Accepted values:
+
+| Value | Behavior |
+|-------|----------|
+| `"on"` (default) | A repo skill can override a user skill of the same name. |
+| `"off"` | Disable overriding entirely — user skills always win. |
+| `"name-only"` | Match overrides only on skill name (ignore description / source). |
+| `"user-invocable-only"` | Only user-invocable skills can be overridden — model-invoked skills always come from their original location. |
+
+Useful when team policy says "user-defined skills must always take precedence" (`"off"`) or "only allow narrow name-based overrides" (`"name-only"`).
 
 ## Best Practices
 
@@ -724,7 +753,7 @@ If Claude uses your skill when you don't want it:
 
 ### Claude Doesn't See All Skills
 
-Skill descriptions are loaded at **2% of the context window** (fallback: **16,000 characters**). Run `/context` to check for warnings about excluded skills. Override the budget with the `SLASH_COMMAND_TOOL_CHAR_BUDGET` environment variable.
+Skill descriptions are loaded at **1% of the context window** (fallback: **8,000 characters**). Each entry is capped at 250 characters regardless of budget. Run `/context` to check for warnings about excluded skills. Override the budget with the `SLASH_COMMAND_TOOL_CHAR_BUDGET` environment variable.
 
 ## Security Considerations
 
@@ -736,6 +765,19 @@ Skill descriptions are loaded at **2% of the context window** (fallback: **16,00
 - **External sources are risky**: Skills that fetch from external URLs can be compromised
 - **Tool misuse**: Malicious Skills can invoke tools in harmful ways
 - **Treat like installing software**: Only use Skills from trusted sources
+
+### Disabling shell substitution in skills
+
+Skills support the `` !`command` `` syntax to inject the output of shell commands into the prompt before Claude sees it. In security-sensitive environments (shared enterprise deployments, locked-down CI runners) you can disable this substitution entirely via the `disableSkillShellExecution` setting (added in **v2.1.91**):
+
+```jsonc
+// ~/.claude/settings.json or managed policy
+{
+  "disableSkillShellExecution": true
+}
+```
+
+When `disableSkillShellExecution` is `true`, any `` !`command` `` markers in a skill are left as literal text instead of being executed — removing the skill-level shell-injection attack surface without disabling skills themselves. Consider combining this with an `allowedTools` allowlist for defense in depth.
 
 ## Skills vs Other Features
 
@@ -802,3 +844,12 @@ Once you start building skills seriously, two things become essential: a library
 - [Memory Guide](../02-memory/) - Persistent context
 - [MCP (Model Context Protocol)](../05-mcp/) - Real-time external data
 - [Hooks Guide](../06-hooks/) - Event-driven automation
+
+---
+**Last Updated**: May 9, 2026
+**Claude Code Version**: 2.1.138
+**Sources**:
+- https://code.claude.com/docs/en/skills
+- https://code.claude.com/docs/en/settings
+- https://code.claude.com/docs/en/changelog
+**Compatible Models**: Claude Sonnet 4.6, Claude Opus 4.7, Claude Haiku 4.5
