@@ -28,10 +28,10 @@ cp 02-memory/personal-CLAUDE.md ~/.claude/CLAUDE.md
 ### Skills
 ```bash
 # Skills cá nhân
-cp -r 03-skills/code-review ~/.claude/skills/
+cp -r 03-skills/code-review-specialist ~/.claude/skills/
 
 # Skills dự án
-cp -r 03-skills/code-review .claude/skills/
+cp -r 03-skills/code-review-specialist .claude/skills/
 ```
 
 ### Tác Nhân Con
@@ -147,7 +147,7 @@ cp 04-subagents/code-reviewer.md .claude/agents/
 # Sử dụng: Tự động ủy quyền
 
 # Cách 3: Skill
-cp -r 03-skills/code-review ~/.claude/skills/
+cp -r 03-skills/code-review-specialist ~/.claude/skills/
 # Sử dụng: Tự động gọi
 
 # Cách 4: Plugin (tốt nhất)
@@ -363,7 +363,7 @@ cp 05-mcp/github-mcp.json .mcp.json
 ### Tuần 2
 ```bash
 # Cài đặt skill
-cp -r 03-skills/code-review ~/.claude/skills/
+cp -r 03-skills/code-review-specialist ~/.claude/skills/
 
 # Để nó tự động gọi
 # Chỉ cần nói: "Review đoạn code này tìm lỗi"
@@ -442,7 +442,7 @@ echo $GITHUB_TOKEN
 |------|----------|---------|
 | Lối tắt nhanh | Lệnh Slash (55+) | `01-slash-commands/optimize.md` |
 | Tiêu chuẩn đội | Bộ Nhớ | `02-memory/project-CLAUDE.md` |
-| Workflow tự động | Skill | `03-skills/code-review/` |
+| Workflow tự động | Skill | `03-skills/code-review-specialist/` |
 | Tác vụ chuyên biệt | Tác Nhân Con | `04-subagents/code-reviewer.md` |
 | Dữ liệu bên ngoài | MCP (+ Elicitation, WebSocket) | `05-mcp/github-mcp.json` |
 | Tự động hóa sự kiện | Hook (25 sự kiện, 4 loại) | `06-hooks/pre-commit.sh` |

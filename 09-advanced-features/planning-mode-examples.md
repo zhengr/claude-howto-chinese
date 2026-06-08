@@ -533,7 +533,9 @@ Proceed with this plan? (yes/no/modify)
 7. **Plan for testing** at each phase
 
 ---
-**Last Updated**: May 9, 2026
-**Claude Code Version**: 2.1.138
+**Last Updated**: June 2, 2026
+**Claude Code Version**: 2.1.160
 **Sources**:
 - https://code.claude.com/docs/en/changelog
+- https://code.claude.com/docs/en/best-practices
+**Compatible Models**: Claude Sonnet 4.6, Claude Opus 4.8, Claude Haiku 4.5

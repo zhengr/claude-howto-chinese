@@ -66,7 +66,7 @@ Auto-invoked capabilities with scripts and templates.
 
 ### Code Review Skill (5 files)
 ```
-code-review/
+code-review-specialist/
 ├── SKILL.md                          # Skill definition
 ├── scripts/
 │   ├── analyze-metrics.py            # Code metrics analyzer
@@ -219,9 +219,9 @@ Event-driven automation scripts that execute automatically.
 **Usage**: Configured in settings, executed automatically
 
 **Hook Types** (5 types, 29 events):
-- Tool Hooks: PreToolUse, PostToolUse, PostToolUseFailure, PermissionRequest
-- Session Hooks: SessionStart, SessionEnd, Stop, StopFailure, SubagentStart, SubagentStop
-- Task Hooks: UserPromptSubmit, TaskCompleted, TaskCreated, TeammateIdle
+- Tool Hooks: PreToolUse, PostToolUse, PostToolUseFailure, PostToolBatch, PermissionRequest, PermissionDenied
+- Session Hooks: SessionStart, Setup, SessionEnd, Stop, StopFailure, SubagentStart, SubagentStop
+- Task Hooks: UserPromptSubmit, UserPromptExpansion, TaskCompleted, TaskCreated, TeammateIdle
 - Lifecycle Hooks: ConfigChange, CwdChanged, FileChanged, PreCompact, PostCompact, WorktreeCreate, WorktreeRemove, Notification, InstructionsLoaded, Elicitation, ElicitationResult
 
 ---
@@ -367,6 +367,7 @@ Advanced capabilities for complex workflows.
 | `README.md` | Complete guide | All advanced features documentation |
 | `config-examples.json` | Configuration examples | 10+ use-case-specific configurations |
 | `planning-mode-examples.md` | Planning examples | REST API, database migration, refactoring |
+| Dynamic Workflows | Deterministic multi-agent orchestration via `/workflows` (v2.1.154) | Comprehensive audits, migrations, scale-out |
 | Scheduled Tasks | Recurring tasks with `/loop` and cron tools | Automated recurring workflows |
 | Chrome Integration | Browser automation via headless Chromium | Web testing and scraping |
 | Remote Control (expanded) | Connection methods, security, comparison table | Remote session management |
@@ -390,6 +391,11 @@ Advanced capabilities for complex workflows.
 - Long-running operations without blocking
 - Parallel development workflows
 - Task management and monitoring
+
+### Dynamic Workflows (v2.1.154)
+- Deterministic orchestration of tens-to-hundreds of background subagents
+- Fan-out / pipeline / parallel stages for comprehensive coverage
+- View runs with `/workflows`; `ultracode` `/effort` turns it on for a session
 
 ### Permission Modes
 - **default**: Ask for approval on risky actions
@@ -459,7 +465,7 @@ Command-line interface usage patterns and reference.
 - `claude` - Start interactive session
 - `claude -p "prompt"` - Headless/non-interactive mode
 - `claude web` - Launch web session
-- `claude --model` - Select model (Sonnet 4.6, Opus 4.7, Haiku 4.5)
+- `claude --model` - Select model (Sonnet 4.6, Opus 4.8, Haiku 4.5)
 - `claude --permission-mode` - Set permission mode
 - `claude --remote` - Enable remote control via WebSocket
 
@@ -515,7 +521,7 @@ claude-howto/
 │   └── README.md
 │
 ├── 03-skills/                                   # Skills
-│   ├── code-review/
+│   ├── code-review-specialist/
 │   │   ├── SKILL.md
 │   │   ├── scripts/
 │   │   │   ├── analyze-metrics.py
@@ -666,7 +672,7 @@ cp 01-slash-commands/optimize.md .claude/commands/
 cp 04-subagents/code-reviewer.md .claude/agents/
 
 # Install skill
-cp -r 03-skills/code-review ~/.claude/skills/
+cp -r 03-skills/code-review-specialist ~/.claude/skills/
 
 # Or install complete plugin
 /plugin install pr-review
@@ -808,12 +814,12 @@ Run tests in background
 ### Performance
 - `01-slash-commands/optimize.md` - Performance analysis
 - `04-subagents/code-reviewer.md` - Performance review
-- `03-skills/code-review/` - Performance metrics
+- `03-skills/code-review-specialist/` - Performance metrics
 - `07-plugins/pr-review/agents/performance-analyzer.md` - Performance specialist
 
 ### Security
 - `04-subagents/secure-reviewer.md` - Security review
-- `03-skills/code-review/` - Security analysis
+- `03-skills/code-review-specialist/` - Security analysis
 - `07-plugins/pr-review/` - Security checks
 
 ### Testing
@@ -874,15 +880,15 @@ Want to add more examples? Follow the structure:
 
 ---
 
-**Last Updated**: May 9, 2026
-**Claude Code Version**: 2.1.138
+**Last Updated**: June 2, 2026
+**Claude Code Version**: 2.1.160
 **Sources**:
 - https://code.claude.com/docs/en/overview
 - https://code.claude.com/docs/en/hooks
 - https://code.claude.com/docs/en/commands
-- https://github.com/anthropics/claude-code/releases/tag/v2.1.131
-- https://github.com/anthropics/claude-code/releases/tag/v2.1.138
-**Compatible Models**: Claude Sonnet 4.6, Claude Opus 4.7, Claude Haiku 4.5
+- https://github.com/anthropics/claude-code/releases/tag/v2.1.153
+- https://github.com/anthropics/claude-code/releases/tag/v2.1.154
+**Compatible Models**: Claude Sonnet 4.6, Claude Opus 4.8, Claude Haiku 4.5
 **Total Examples**: 100+ files
 **Categories**: 10 features
 **Hooks**: 9 automation scripts

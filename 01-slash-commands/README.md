@@ -37,13 +37,14 @@ Built-in commands are shortcuts for common actions. There are **60+ built-in com
 | `/desktop` | Continue in Desktop app (alias: `/app`) |
 | `/diff` | Interactive diff viewer for uncommitted changes |
 | `/doctor` | Diagnose installation health — openable while Claude is responding; shows status icons; press `f` to auto-fix issues (enhanced in v2.1.116) |
-| `/effort [low\|medium\|high\|xhigh\|max\|auto]` | Set effort level via interactive arrow-key slider. Levels: `low` → `medium` → `high` → `xhigh` (new in v2.1.111) → `max`. Default is `xhigh` on Opus 4.7; `max` requires Opus 4.7 |
+| `/effort [low\|medium\|high\|xhigh\|max\|auto]` | Set effort level via interactive arrow-key slider. Levels: `low` → `medium` → `high` → `xhigh` (new in v2.1.111) → `max`. Default is `high` on Opus 4.8 (`xhigh` on Opus 4.7); `xhigh` needs Opus 4.8 or 4.7; `max` works on Opus 4.8/4.7/4.6 and Sonnet 4.6. The menu also offers `ultracode` (not a model effort level — it sends `xhigh` and has Claude orchestrate dynamic workflows; session-only) |
 | `/exit` | Exit the REPL (alias: `/quit`) |
 | `/export [filename]` | Export the current conversation to a file or clipboard |
-| `/extra-usage` | Configure extra usage for rate limits |
+| `/usage-credits` | Configure extra usage for rate limits (renamed from `/extra-usage` in v2.1.144; `/extra-usage` still works as an alias) |
 | `/fast [on\|off]` | Toggle fast mode |
-| `/feedback` | Submit feedback (alias: `/bug`) |
+| `/feedback` | Submit feedback (alias: `/bug`). Since v2.1.141, can attach recent sessions (last 24h or 7d) so reports spanning more than one session include context. |
 | `/focus` | Toggle focus view (added v2.1.110; replaces `Ctrl+O` for focus toggle) |
+| `/goal <statement>` | Register a session-level completion condition; Claude keeps working until the goal is met. `/goal clear` removes it. Active goal appears in the status line, with a live overlay panel showing elapsed time, turn count, and token usage (added v2.1.139). |
 | `/help` | Show help |
 | `/hooks` | View hook configurations |
 | `/ide` | Manage IDE integrations |
@@ -58,7 +59,7 @@ Built-in commands are shortcuts for common actions. There are **60+ built-in com
 | `/mcp` | Manage MCP servers and OAuth |
 | `/memory` | Edit `CLAUDE.md`, toggle auto-memory |
 | `/mobile` | QR code for mobile app (aliases: `/ios`, `/android`) |
-| `/model [model]` | Select model with left/right arrows for effort |
+| `/model [model]` | Select model with left/right arrows for effort. Since v2.1.153, the choice is **saved as the default** for new sessions (matching the IDE); press `s` after selecting to apply it to the current session only. (The keybinding `modelPicker:setAsDefault` was renamed to `modelPicker:thisSessionOnly`; the old `d` action is now `s`.) |
 | `/passes` | Share free week of Claude Code |
 | `/permissions` | View/update permissions (alias: `/allowed-tools`) |
 | `/plan [description]` | Enter plan mode |
@@ -69,6 +70,7 @@ Built-in commands are shortcuts for common actions. There are **60+ built-in com
 | `/release-notes` | View changelog |
 | `/recap` | Show session recap / summary when returning to a session (added v2.1.108) |
 | `/reload-plugins` | Reload active plugins |
+| `/reload-skills` | Re-scan skill directories without restarting the session (added v2.1.152) |
 | `/remote-control` | Remote control from claude.ai (alias: `/rc`) |
 | `/remote-env` | Configure default remote environment |
 | `/rename [name]` | Rename session |
@@ -77,6 +79,7 @@ Built-in commands are shortcuts for common actions. There are **60+ built-in com
 | `/rewind` | Rewind conversation and/or code (alias: `/checkpoint`) |
 | `/sandbox` | Toggle sandbox mode |
 | `/schedule [description]` | Create/manage Cloud scheduled tasks |
+| `/scroll-speed <+N\|-N>` | Tune mouse-wheel scroll speed of the TUI live-preview pane with a live preview. Persists per-machine to `~/.claude/preferences.json` (added v2.1.139). |
 | `/security-review` | Analyze branch for security vulnerabilities |
 | `/skills` | List available skills |
 | `/stats` | Typing-shortcut alias for `/usage` — opens the stats tab (daily usage, sessions, streaks) (v2.1.118+) |
@@ -94,6 +97,7 @@ Built-in commands are shortcuts for common actions. There are **60+ built-in com
 | `/upgrade` | Open upgrade page for higher plan tier |
 | `/usage` | Canonical usage dashboard (v2.1.118) — combines plan usage limits, rate limits, cost, and daily session stats. `/cost` and `/stats` are typing-shortcut aliases that open specific tabs |
 | `/voice` | Toggle push-to-talk voice dictation |
+| `/workflows` | View running and completed dynamic workflow runs (added v2.1.154). See [Dynamic Workflows](../09-advanced-features/README.md#dynamic-workflows) |
 
 ### Bundled Skills
 
@@ -105,7 +109,8 @@ These skills ship with Claude Code and are invoked like slash commands:
 | `/claude-api` | Load Claude API reference for project language |
 | `/debug [description]` | Enable debug logging |
 | `/loop [interval] <prompt>` | Run prompt repeatedly on interval |
-| `/simplify [focus]` | Review changed files for code quality |
+| `/code-review [effort]` | Review the current diff for correctness bugs at a chosen effort level (e.g. `/code-review high`). Originally absorbed `/simplify` in v2.1.146, but `/simplify` returned as a distinct command in v2.1.154 |
+| `/simplify` | Run a cleanup-only review (reuse / simplification / efficiency / altitude) and apply the fixes; does **not** hunt for bugs — use `/code-review` for that. Briefly an alias of `/code-review --fix` (v2.1.152), it became cleanup-only in v2.1.154 |
 
 ### Deprecated Commands
 
@@ -122,7 +127,7 @@ These skills ship with Claude Code and are invoked like slash commands:
 - `/fork` renamed to `/branch` with `/fork` kept as alias (v2.1.77)
 - `/output-style` deprecated (v2.1.73)
 - `/review` deprecated in favor of the `code-review` plugin
-- `/effort` command added with `max` level requiring Opus 4.7 (originally Opus 4.6-only)
+- `/effort` command added; `max` level available on Opus 4.6+ (originally Opus 4.6-only)
 - `/voice` command added for push-to-talk voice dictation
 - `/schedule` command added for creating/managing scheduled tasks
 - `/color` command added for prompt bar customization
@@ -140,10 +145,31 @@ These skills ship with Claude Code and are invoked like slash commands:
 - `/recap` command added to manually trigger session context recap (v2.1.108)
 - `/undo` added as alias for `/rewind` (v2.1.108)
 - `/proactive` added as alias for `/loop` (v2.1.105)
-- `/effort` gained interactive arrow-key slider and new `xhigh` level between `high` and `max`; default effort raised to `xhigh` for Opus 4.7 plans (v2.1.111)
+- `/effort` gained interactive arrow-key slider and new `xhigh` level between `high` and `max`; default effort raised to `xhigh` for Opus 4.7 plans (v2.1.111). On Opus 4.8 the default is `high` (v2.1.154)
 - `/ultrareview` added for comprehensive cloud-based multi-agent code review (v2.1.111)
 - `/less-permission-prompts` added to analyze Bash/MCP tool calls and reduce permission prompts via an allowlist in `.claude/settings.json` (v2.1.111)
 - Auto mode no longer requires the `--enable-auto-mode` flag for Max subscribers on Opus 4.7 (v2.1.112)
+- `/goal` added — session-level completion condition that Claude works toward across turns; live overlay shows elapsed time, turn count, and token usage (v2.1.139)
+- `/scroll-speed` added — tune mouse-wheel scroll speed of the TUI live-preview pane; persists per-machine (v2.1.139)
+- `/reload-skills` added — re-scan skill directories without restarting the session (v2.1.152)
+- `/model` now saves the selected model as the default for new sessions; press `s` for session-only (keybinding `modelPicker:setAsDefault` → `modelPicker:thisSessionOnly`) (v2.1.153)
+- `/workflows` added — view running and completed dynamic workflow runs (v2.1.154)
+- `/simplify` returned as a distinct cleanup-only review command (reuse / simplification / efficiency / altitude), separate from `/code-review`'s bug hunt (v2.1.154)
+
+### `/goal` — Session-Level Completion Condition
+
+> **New in v2.1.139**
+
+Use `/goal` to register a completion condition for the current session. Claude works toward it across turns, and an overlay panel shows elapsed time, turn count, and tokens used. Clear it with `/goal clear`. Works in interactive mode, `claude -p`, and Remote Control.
+
+```
+User: /goal Migrate the payments service from REST to gRPC and get the integration tests passing.
+Claude: Goal registered. I'll work toward this until you clear it.
+[Goal panel: ⏱ 0s · turns 0 · tokens 0]
+
+User: start by listing the REST endpoints
+Claude: [does the work, panel updates]
+```
 
 ### `/team-onboarding` — Teammate Ramp-Up Guide
 
@@ -601,14 +627,19 @@ If both exist with the same name, the **skill takes precedence**. Remove one or 
 
 ---
 
-**Last Updated**: May 9, 2026
-**Claude Code Version**: 2.1.138
+**Last Updated**: June 2, 2026
+**Claude Code Version**: 2.1.160
 **Sources**:
 - https://code.claude.com/docs/en/slash-commands
 - https://code.claude.com/docs/en/interactive-mode
 - https://code.claude.com/docs/en/changelog
-- https://github.com/anthropics/claude-code/releases/tag/v2.1.118
-- https://github.com/anthropics/claude-code/releases/tag/v2.1.116
-**Compatible Models**: Claude Sonnet 4.6, Claude Opus 4.7, Claude Haiku 4.5
+- https://code.claude.com/docs/en/commands
+- https://code.claude.com/docs/en/model-config
+- https://github.com/anthropics/claude-code/releases/tag/v2.1.139
+- https://github.com/anthropics/claude-code/releases/tag/v2.1.144
+- https://github.com/anthropics/claude-code/releases/tag/v2.1.152
+- https://github.com/anthropics/claude-code/releases/tag/v2.1.153
+- https://github.com/anthropics/claude-code/releases/tag/v2.1.154
+**Compatible Models**: Claude Sonnet 4.6, Claude Opus 4.8, Claude Haiku 4.5
 
 *Part of the [Claude How To](../) guide series*

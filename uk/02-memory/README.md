@@ -3,8 +3,8 @@
 <!-- i18n-date: 2026-04-09 -->
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="../resources/logos/claude-howto-logo-dark.svg">
-  <img alt="Claude How To" src="../resources/logos/claude-howto-logo.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="../../resources/logos/claude-howto-logo-dark.svg">
+  <img alt="Claude How To" src="../../resources/logos/claude-howto-logo.svg">
 </picture>
 
 # Посібник з пам'яті
@@ -301,9 +301,9 @@ graph TD
 |--------|-------------|-------------|
 | 1 (Найвищий) | Managed policy (системний рівень) | Загальноорганізаційне застосування |
 | 2 | `managed-settings.d/` (v2.1.83+) | Модульні drop-in політики, об'єднані за алфавітом |
-| 3 | `~/.claude/settings.json` | Налаштування користувача |
+| 3 | `.claude/settings.local.json` | Локальні перевизначення (ігнорується git) |
 | 4 | `.claude/settings.json` | Рівень проєкту (комітиться в git) |
-| 5 (Найнижчий) | `.claude/settings.local.json` | Локальні перевизначення (ігнорується git) |
+| 5 (Найнижчий) | `~/.claude/settings.json` | Налаштування користувача |
 
 **Платформо-специфічна конфігурація (v2.1.51+):**
 

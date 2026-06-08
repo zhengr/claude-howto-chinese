@@ -12,7 +12,7 @@
 [![GitHub Stars](https://img.shields.io/github/stars/luongnv89/claude-howto?style=flat&color=gold)](https://github.com/luongnv89/claude-howto/stargazers)
 [![GitHub Forks](https://img.shields.io/github/forks/luongnv89/claude-howto?style=flat)](https://github.com/luongnv89/claude-howto/network/members)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-2.1.138-brightgreen)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-2.1.160-brightgreen)](CHANGELOG.md)
 [![Claude Code](https://img.shields.io/badge/Claude_Code-2.1+-purple)](https://code.claude.com)
 
 🌐 **Language / Ngôn ngữ / 语言 / Мова:** [English](README.md) | [Tiếng Việt](vi/README.md) | [中文](zh/README.md) | [Українська](uk/README.md) | [日本語](ja/README.md)
@@ -102,7 +102,7 @@ Run `/lesson-quiz [topic]` after each module. The quiz pinpoints what you missed
 
 - **GitHub stars** from developers who use Claude Code daily
 - **Forks** from teams adapting this guide for their own workflows
-- **Actively maintained** — synced with every Claude Code release (latest: v2.1.138, May 2026)
+- **Actively maintained** — synced with every Claude Code release (latest: v2.1.160, June 2026)
 - **Community-driven** — contributions from developers who share their real-world configurations
 
 [![Star History Chart](https://api.star-history.com/svg?repos=luongnv89/claude-howto&type=Date)](https://star-history.com/#luongnv89/claude-howto&Date)
@@ -158,7 +158,7 @@ cp 01-slash-commands/optimize.md /path/to/your-project/.claude/commands/
 cp 02-memory/project-CLAUDE.md /path/to/your-project/CLAUDE.md
 
 # 5. Install a skill:
-cp -r 03-skills/code-review ~/.claude/skills/
+cp -r 03-skills/code-review-specialist ~/.claude/skills/
 ```
 
 Want the full setup? Here's the **1-hour essential setup**:
@@ -171,7 +171,7 @@ cp 01-slash-commands/*.md .claude/commands/
 cp 02-memory/project-CLAUDE.md ./CLAUDE.md
 
 # Install a skill (15 min)
-cp -r 03-skills/code-review ~/.claude/skills/
+cp -r 03-skills/code-review-specialist ~/.claude/skills/
 
 # Weekend goal: add hooks, subagents, MCP, and plugins
 # Follow the learning path for guided setup
@@ -201,7 +201,7 @@ cp -r 03-skills/code-review ~/.claude/skills/
 Yes. MIT licensed, free forever. Use it in personal projects, at work, in your team — no restrictions beyond including the license notice.
 
 **Is this maintained?**
-Actively. The guide is synced with every Claude Code release. Current version: v2.1.138 (May 2026), compatible with Claude Code 2.1+.
+Actively. The guide is synced with every Claude Code release. Current version: v2.1.160 (June 2026), compatible with Claude Code 2.1+.
 
 **How is this different from the official docs?**
 The official docs are a feature reference. This guide is a tutorial with diagrams, production-ready templates, and a progressive learning path. They complement each other — start here to learn, reference the docs when you need specifics.
@@ -210,7 +210,7 @@ The official docs are a feature reference. This guide is a tutorial with diagram
 11-13 hours for the full path. But you'll get immediate value in 15 minutes — just copy a slash command template and try it.
 
 **Can I use this with Claude Sonnet / Haiku / Opus?**
-Yes. All templates work with Claude Sonnet 4.6, Claude Opus 4.7, and Claude Haiku 4.5.
+Yes. All templates work with Claude Sonnet 4.6, Claude Opus 4.8, and Claude Haiku 4.5.
 
 **Can I contribute?**
 Absolutely. See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines. We welcome new examples, bug fixes, documentation improvements, and community templates.
@@ -280,7 +280,7 @@ cp 01-slash-commands/*.md .claude/commands/
 cp 02-memory/project-CLAUDE.md ./CLAUDE.md
 
 # Skills
-cp -r 03-skills/code-review ~/.claude/skills/
+cp -r 03-skills/code-review-specialist ~/.claude/skills/
 
 # Subagents
 cp 04-subagents/*.md .claude/agents/
@@ -373,17 +373,17 @@ cp 02-memory/personal-CLAUDE.md ~/.claude/CLAUDE.md
 **What**: Reusable, auto-invoked capabilities with instructions and scripts
 
 **Examples**:
-- `code-review/` - Comprehensive code review with scripts
+- `code-review-specialist/` - Comprehensive code review with scripts
 - `brand-voice/` - Brand voice consistency checker
 - `doc-generator/` - API documentation generator
 
 **Installation**:
 ```bash
 # Personal skills
-cp -r 03-skills/code-review ~/.claude/skills/
+cp -r 03-skills/code-review-specialist ~/.claude/skills/
 
 # Project skills
-cp -r 03-skills/code-review /path/to/project/.claude/skills/
+cp -r 03-skills/code-review-specialist /path/to/project/.claude/skills/
 ```
 
 **Usage**: Automatically invoked when relevant
@@ -482,7 +482,7 @@ Configure hooks in `~/.claude/settings.json`:
 
 **Usage**: Hooks execute automatically on events
 
-**Hook Types** (5 types, 28 events):
+**Hook Types** (5 types, 29 events):
 - **Tool Hooks**: `PreToolUse`, `PostToolUse`, `PostToolUseFailure`, `PermissionRequest`
 - **Session Hooks**: `SessionStart`, `SessionEnd`, `Stop`, `StopFailure`, `SubagentStart`, `SubagentStop`
 - **Task Hooks**: `UserPromptSubmit`, `TaskCompleted`, `TaskCreated`, `TeammateIdle`
@@ -664,7 +664,7 @@ Claude:
 │   ├── personal-CLAUDE.md
 │   └── README.md
 ├── 03-skills/
-│   ├── code-review/
+│   ├── code-review-specialist/
 │   │   ├── SKILL.md
 │   │   ├── scripts/
 │   │   └── templates/
@@ -871,12 +871,12 @@ MIT License - see [LICENSE](LICENSE). Free to use, modify, and distribute. The o
 
 ---
 
-**Last Updated**: May 9, 2026
-**Claude Code Version**: 2.1.138
+**Last Updated**: June 2, 2026
+**Claude Code Version**: 2.1.160
 **Sources**:
 - https://code.claude.com/docs/en/overview
 - https://code.claude.com/docs/en/changelog
-- https://github.com/anthropics/claude-code/releases/tag/v2.1.131
-- https://github.com/anthropics/claude-code/releases/tag/v2.1.138
-- https://github.com/anthropics/claude-code/releases/tag/v2.1.113
-**Compatible Models**: Claude Sonnet 4.6, Claude Opus 4.7, Claude Haiku 4.5
+- https://platform.claude.com/docs/en/about-claude/models/overview
+- https://github.com/anthropics/claude-code/releases
+- https://github.com/anthropics/claude-code/releases/tag/v2.1.154
+**Compatible Models**: Claude Sonnet 4.6, Claude Opus 4.8, Claude Haiku 4.5

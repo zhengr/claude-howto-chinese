@@ -597,12 +597,12 @@ Lesson READMEs end with a metadata block:
 
 ```markdown
 ---
-**Last Updated**: March 2026
-**Claude Code Version**: 2.1.97
-**Compatible Models**: Claude Sonnet 4.6, Claude Opus 4.7, Claude Haiku 4.5
+**Last Updated**: May 29, 2026
+**Claude Code Version**: 2.1.156
+**Compatible Models**: Claude Sonnet 4.6, Claude Opus 4.8, Claude Haiku 4.5
 ```
 
-- Use month + year format (e.g., "March 2026")
+- Use month + day + year format (e.g., "May 20, 2026")
 - Update the version when features change
 - List all compatible models
 
@@ -631,10 +631,11 @@ Before submitting content, verify:
 
 ---
 
-**Last Updated**: May 9, 2026
-**Claude Code Version**: 2.1.138
+**Last Updated**: May 29, 2026
+**Claude Code Version**: 2.1.156
 **Sources**:
 - https://code.claude.com/docs/en/overview
 - https://code.claude.com/docs/en/changelog
-- https://www.anthropic.com/news/claude-opus-4-7
-**Compatible Models**: Claude Sonnet 4.6, Claude Opus 4.7, Claude Haiku 4.5
+- https://www.anthropic.com/news/claude-opus-4-8
+- https://github.com/anthropics/claude-code/releases/tag/v2.1.154
+**Compatible Models**: Claude Sonnet 4.6, Claude Opus 4.8, Claude Haiku 4.5

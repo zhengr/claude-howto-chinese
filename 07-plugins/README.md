@@ -58,6 +58,8 @@ sequenceDiagram
     Tools-->>Claude: Plugin installed ✅
 ```
 
+> **No marketplace required (v2.1.157+)**: Plugins placed in `.claude/skills` directories now auto-load without a marketplace. Scaffold a new one with `claude plugin init <name>`.
+
 ## Plugin Types & Distribution
 
 | Type | Scope | Shared | Authority | Examples |
@@ -213,6 +215,23 @@ Once configured, LSP servers provide:
 - **Hover information** — type signatures and documentation on hover
 - **Symbol listing** — browse symbols in the current file or workspace
 
+### `bin/` directory on `PATH`
+
+When a plugin is enabled, its `bin/` directory is prepended to the session's `PATH`. Any executable shipped there can be invoked directly from the Bash tool by name — no qualified path required.
+
+```bash
+# In a plugin layout:
+my-plugin/
+├── plugin.json
+└── bin/
+    └── my-tool          # executable file (chmod +x)
+
+# Inside a Claude Code session with the plugin enabled:
+$ my-tool --help
+```
+
+Use this for CLI helpers that hooks, skills, or commands inside the same plugin will shell out to. Mark the files executable in the plugin repo (`chmod +x`) — git preserves the bit.
+
 ## Plugin Options (v2.1.83+)
 
 Plugins can declare user-configurable options in the manifest via `userConfig`. Values marked `sensitive: true` are stored in the system keychain rather than plain-text settings files:
@@ -320,6 +339,8 @@ Use **standalone slash commands** for quick personal workflows. Use **plugins** 
 > **Spaced invocation (v2.1.136+)**: Plugin slash commands also work with a space — `/myplugin review` resolves to the canonical `/myplugin:review`. Either form is fine; the colon form is canonical and recommended in scripts.
 
 > **`skills/` discovery (v2.1.136+)**: A `skills` entry in `plugin.json` no longer hides the plugin's default `skills/` directory. Skills declared in both places are merged, so you can list a few highlights in `plugin.json` without losing the rest.
+
+> **Root-level `SKILL.md` plugins (v2.1.142+)**: A plugin with a top-level `SKILL.md` and **no `skills/` subdirectory** is itself surfaced as a single skill — the plugin *is* the skill. This is an additional pattern, not a replacement for the `skills/` directory or the `plugin.json` `skills` entry; use it for small single-skill plugins where the directory layout adds no value.
 
 ## Practical Examples
 
@@ -507,6 +528,16 @@ Example `blockedMarketplaces` with host/path regex (v2.1.119):
 - **Default git timeout**: Increased from 30s to 120s for large plugin repositories
 - **Custom npm registries**: Plugins can specify custom npm registry URLs for dependency resolution
 - **Version pinning**: Lock plugins to specific versions for reproducible environments
+- **Projected context cost in the browse pane (v2.1.143)**: The `/plugin` marketplace browser shows each plugin's projected per-turn context-token cost — the sum of always-loaded skills, hooks, and MCP server descriptors. Use it to size plugin adoption before installing. The same projection is available post-install via [`claude plugin details <name>`](#claude-plugin-details-name-v21139).
+
+Example browse row with the cost column:
+
+```text
+NAME              VERSION   AUTHOR     CTX/TURN   DESCRIPTION
+code-reviewer     1.2.0     anthropic  +1,420     Multi-agent PR review
+devops-toolkit    0.4.1     acme       +3,180     SRE playbooks, on-call helpers
+docs-helper       0.9.0     community  +610       Doc-style guide enforcement
+```
 
 ### Marketplace definition schema
 
@@ -666,11 +697,29 @@ claude plugin validate                       # Validate plugin structure
 claude plugin tag <version>                  # Create a release git tag with version validation (v2.1.118+)
 claude plugin prune                          # Remove orphaned auto-installed plugin dependencies (v2.1.121+)
 claude plugin uninstall <name> --prune       # Uninstall and cascade-clean orphaned dependencies (v2.1.121+)
+claude plugin details <name>                 # Show inventory + projected per-turn token cost (v2.1.139+)
 ```
 
 Example: `claude plugin tag v0.3.0` validates the version format, creates the matching git tag, and is the recommended way to cut plugin releases for distribution.
 
 `claude plugin prune` is useful after installing or uninstalling marketplace plugins that pulled in their own dependencies — it removes any auto-installed plugins whose parent plugin has since been removed. `plugin uninstall --prune` does the same cascade in a single step.
+
+> **Dependency enforcement (v2.1.143)**: `claude plugin disable <name>` **refuses** if another enabled plugin still depends on the target (the dependency graph would break). `claude plugin enable <name>` **force-enables transitive dependencies** after a single confirmation prompt rather than requiring a separate enable for each. Use `claude plugin prune` to clean up dependencies whose dependents were later removed.
+
+### `claude plugin details <name>` (v2.1.139+)
+
+`claude plugin details <name>` prints the plugin's full component inventory — skills, hooks, MCP servers, LSP servers, background monitors, slash commands — plus a **projected per-turn (and per-invocation) token cost**. Use it to size a plugin before adopting it, especially on context-constrained models.
+
+Example output (abbreviated):
+
+```text
+plugin: code-reviewer (1.2.0)
+skills:        3      hooks: 2      mcp: 1      lsp: 0      monitors: 0
+commands:      /review, /security-review
+projected ctx: +1,420 tokens per turn  ·  +9,800 tokens per /review invocation
+```
+
+LSP servers were added to the details pane in v2.1.142. See also the marketplace browse pane's projected context cost (v2.1.143) covered in [Plugin Marketplace](#plugin-marketplace).
 
 ## Installation Methods
 
@@ -725,6 +774,7 @@ When auto-update runs, Claude Code:
 |----------|--------|
 | `DISABLE_AUTOUPDATER=1` | Disable all auto-updates (Claude Code + plugins) |
 | `DISABLE_AUTOUPDATER=1` + `FORCE_AUTOUPDATE_PLUGINS=1` | Keep plugin updates, disable Claude Code updates |
+| `CLAUDE_CODE_PLUGIN_PREFER_HTTPS=1` | (v2.1.141+) Force `claude plugin install` to clone GitHub plugin sources over HTTPS instead of SSH, even when an SSH remote is available. Use in CI runners or containers without SSH keys. |
 
 ```bash
 # Disable all auto-updates
@@ -733,6 +783,10 @@ export DISABLE_AUTOUPDATER=1
 # Keep plugin auto-updates only
 export DISABLE_AUTOUPDATER=1
 export FORCE_AUTOUPDATE_PLUGINS=1
+
+# CI runner without SSH keys — force HTTPS for plugin installs
+export CLAUDE_CODE_PLUGIN_PREFER_HTTPS=1
+claude plugin install code-reviewer@anthropic
 ```
 
 ## When to Create a Plugin
@@ -1053,8 +1107,8 @@ The following Claude Code features work together with plugins:
 
 ---
 
-**Last Updated**: May 9, 2026
-**Claude Code Version**: 2.1.138
+**Last Updated**: June 2, 2026
+**Claude Code Version**: 2.1.160
 **Sources**:
 - https://code.claude.com/docs/en/plugins
 - https://code.claude.com/docs/en/plugin-marketplaces
@@ -1062,4 +1116,9 @@ The following Claude Code features work together with plugins:
 - https://github.com/anthropics/claude-code/releases/tag/v2.1.118
 - https://github.com/anthropics/claude-code/releases/tag/v2.1.131
 - https://github.com/anthropics/claude-code/releases/tag/v2.1.138
-**Compatible Models**: Claude Sonnet 4.6, Claude Opus 4.7, Claude Haiku 4.5
+- https://github.com/anthropics/claude-code/releases/tag/v2.1.139
+- https://github.com/anthropics/claude-code/releases/tag/v2.1.141
+- https://github.com/anthropics/claude-code/releases/tag/v2.1.142
+- https://github.com/anthropics/claude-code/releases/tag/v2.1.143
+- https://code.claude.com/docs/en/cli-reference
+**Compatible Models**: Claude Sonnet 4.6, Claude Opus 4.8, Claude Haiku 4.5

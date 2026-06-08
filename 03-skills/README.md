@@ -75,7 +75,7 @@ sequenceDiagram
     Claude->>System: Check available skills (metadata)
     System-->>Claude: Skill descriptions loaded at startup
     Claude->>Claude: Match request to skill description
-    Claude->>SkillInst: Read code-review/SKILL.md
+    Claude->>SkillInst: Read code-review-specialist/SKILL.md
     SkillInst-->>Claude: Level 2: Instructions loaded
     Claude->>Claude: Determine: Need templates?
     Claude->>SkillRes: Read templates/checklist.md
@@ -102,6 +102,8 @@ When skills share the same name across levels, higher-priority locations win: **
 **Nested directories**: When you work with files in subdirectories, Claude Code automatically discovers skills from nested `.claude/skills/` directories. For example, if you're editing a file in `packages/frontend/`, Claude Code also looks for skills in `packages/frontend/.claude/skills/`. This supports monorepo setups where packages have their own skills.
 
 **`--add-dir` directories**: Skills from directories added via `--add-dir` are loaded automatically with live change detection. Any edits to skill files in those directories take effect immediately without restarting Claude Code.
+
+**Reloading skills**: The `/reload-skills` command (added v2.1.152) re-scans all skill directories without restarting the session — useful after adding or editing a skill that isn't picked up by live detection. A `SessionStart` hook can trigger the same re-scan by returning `reloadSkills: true` (see [Hooks](../06-hooks/README.md)).
 
 **Description budget**: Skill descriptions (Level 1 metadata) are capped at **1% of the context window** (fallback: **8,000 characters**). If you have many skills installed, descriptions may be shortened. All skill names are always included, but descriptions are trimmed to fit. Front-load the key use case in descriptions. Override the budget with the `SLASH_COMMAND_TOOL_CHAR_BUDGET` environment variable.
 
@@ -151,6 +153,7 @@ argument-hint: "[filename] [format]"        # Hint for autocomplete
 disable-model-invocation: true              # Only user can invoke
 user-invocable: false                       # Hide from slash menu
 allowed-tools: Read, Grep, Glob             # Restrict tool access
+disallowed-tools: Write, Edit               # Remove specific tools while active (v2.1.152)
 model: opus                                 # Specific model to use
 effort: high                                # Effort level override (low, medium, high, xhigh, max)
 context: fork                               # Run in isolated subagent
@@ -174,8 +177,9 @@ paths: "src/api/**/*.ts"               # Glob patterns limiting when skill activ
 | `disable-model-invocation` | `true` = only the user can invoke via `/name`. Claude will never auto-invoke. |
 | `user-invocable` | `false` = hidden from the `/` menu. Only Claude can invoke it automatically. |
 | `allowed-tools` | Comma-separated list of tools the skill may use without permission prompts. |
+| `disallowed-tools` | Comma-separated list of tools to remove while the skill is active (complements `allowed-tools`). Added v2.1.152. |
 | `model` | Model override while the skill is active (e.g., `opus`, `sonnet`). |
-| `effort` | Effort level override while the skill is active: `low`, `medium`, `high`, `xhigh`, or `max`. Available levels depend on the model — `xhigh` is the Claude Code default for Opus 4.7. |
+| `effort` | Effort level override while the skill is active: `low`, `medium`, `high`, `xhigh`, or `max`. Available levels depend on the model — the default effort is `high` on Opus 4.8 (`xhigh` on Opus 4.7). |
 | `context` | `fork` to run the skill in a forked subagent context with its own context window. |
 | `agent` | Subagent type when `context: fork` (e.g., `Explore`, `Plan`, `general-purpose`). |
 | `shell` | Shell used for `` !`command` `` substitutions and scripts: `bash` (default) or `powershell`. |
@@ -291,6 +295,8 @@ Commands execute immediately; Claude only sees the final output. By default, com
 
 Add `context: fork` to run a skill in an isolated subagent context. The skill content becomes the task for a dedicated subagent with its own context window, keeping the main conversation uncluttered.
 
+> **v2.1.145 fix**: A skill using `context: fork` could previously trigger an infinite re-invocation loop in rare cases. Upgrade to v2.1.145+ if you author or rely on forking skills.
+
 The `agent` field specifies which agent type to use:
 
 | Agent Type | Best For |
@@ -332,7 +338,7 @@ Research $ARGUMENTS thoroughly:
 **Directory Structure:**
 
 ```
-~/.claude/skills/code-review/
+~/.claude/skills/code-review-specialist/
 ├── SKILL.md
 ├── templates/
 │   ├── review-checklist.md
@@ -342,7 +348,7 @@ Research $ARGUMENTS thoroughly:
     └── compare-complexity.py
 ```
 
-**File:** `~/.claude/skills/code-review/SKILL.md`
+**File:** `~/.claude/skills/code-review-specialist/SKILL.md`
 
 ```yaml
 ---
@@ -614,8 +620,10 @@ Can you help me review this code for security issues?
 
 **Or invoke it directly** with the skill name:
 ```
-/code-review src/auth/login.ts
+/code-review-specialist src/auth/login.ts
 ```
+
+> **Note**: This local skill is installed as `code-review-specialist` so it does **not** collide with the built-in `/code-review` command (the renamed `/simplify`, shipped in Claude Code v2.1.146). If you copy it to `~/.claude/skills/code-review/` instead, it will shadow the built-in — keep the `-specialist` suffix to avoid that.
 
 ### Updating a Skill
 
@@ -792,15 +800,19 @@ When `disableSkillShellExecution` is `true`, any `` !`command` `` markers in a s
 
 ## Bundled Skills
 
-Claude Code ships with several built-in skills that are always available without installation:
+Claude Code ships with nine built-in skills that are always available without installation:
 
 | Skill | Description |
 |-------|-------------|
-| `/simplify` | Review changed files for reuse, quality, and efficiency; spawns 3 parallel review agents |
 | `/batch <instruction>` | Orchestrate large-scale parallel changes across codebase using git worktrees |
-| `/debug [description]` | Troubleshoot current session by reading debug log |
-| `/loop [interval] <prompt>` | Run prompt repeatedly on interval (e.g., `/loop 5m check the deploy`) |
 | `/claude-api` | Load Claude API/SDK reference; auto-activates on `anthropic`/`@anthropic-ai/sdk` imports |
+| `/debug [description]` | Troubleshoot current session by reading debug log |
+| `/fewer-permission-prompts` | Scan transcripts and propose a prioritized allowlist for common read-only tools |
+| `/loop [interval] <prompt>` | Run prompt repeatedly on interval (e.g., `/loop 5m check the deploy`) |
+| `/run` *(v2.1.145+)* | Launch this project's app to see a change running — looks for a project skill, otherwise falls back to built-in patterns per project type |
+| `/run-skill-generator` *(v2.1.145+)* | Teach `/run`/`/verify` how to handle a specific project by generating a per-project skill |
+| `/code-review [effort]` | Review the current diff for correctness bugs at a chosen effort level (e.g. `/code-review high`); pass `--comment` to post findings as inline PR comments. Renamed from `/simplify` in v2.1.146 |
+| `/verify` *(v2.1.145+)* | Build, run, and observe the app to confirm a fix works (not just that tests pass) |
 
 These skills are available out-of-the-box and do not need to be installed or configured. They follow the same SKILL.md format as custom skills.
 
@@ -846,10 +858,13 @@ Once you start building skills seriously, two things become essential: a library
 - [Hooks Guide](../06-hooks/) - Event-driven automation
 
 ---
-**Last Updated**: May 9, 2026
-**Claude Code Version**: 2.1.138
+**Last Updated**: June 2, 2026
+**Claude Code Version**: 2.1.160
 **Sources**:
 - https://code.claude.com/docs/en/skills
 - https://code.claude.com/docs/en/settings
 - https://code.claude.com/docs/en/changelog
-**Compatible Models**: Claude Sonnet 4.6, Claude Opus 4.7, Claude Haiku 4.5
+- https://code.claude.com/docs/en/commands
+- https://github.com/anthropics/claude-code/releases/tag/v2.1.152
+- https://github.com/anthropics/claude-code/releases/tag/v2.1.154
+**Compatible Models**: Claude Sonnet 4.6, Claude Opus 4.8, Claude Haiku 4.5

@@ -51,10 +51,11 @@ The older JavaScript bundle is still produced for Windows and for environments t
 | `/doctor` (slash command) | Diagnose installation, config, and plugin health. Since v2.1.116 it can be opened **while Claude is responding**, shows status icons inline, and accepts the `f` keypress to auto-fix detected issues | run `/doctor` inside the REPL |
 | `claude mcp` | Configure MCP servers | See [MCP documentation](../05-mcp/) |
 | `claude mcp serve` | Run Claude Code as an MCP server | `claude mcp serve` |
-| `claude agents` | List all configured subagents | `claude agents` |
+| `claude agents` | Open the **Agent View** (Research Preview, v2.1.139+) — multi-session manager listing every Claude Code session with its status. See [Agent View](#agent-view-claude-agents-v21139) below. | `claude agents` |
 | `claude auto-mode defaults` | Print auto mode default rules as JSON | `claude auto-mode defaults` |
 | `claude remote-control` | Start Remote Control server | `claude remote-control` |
 | `claude plugin` | Manage plugins (install, enable, disable) | `claude plugin install my-plugin` |
+| `claude plugin init <name>` | Scaffold a new plugin in `.claude/skills` — auto-loads with no marketplace required (v2.1.157+) | `claude plugin init my-plugin` |
 | `claude plugin tag <version>` | Create a release git tag for a plugin with version validation (v2.1.118+) | `claude plugin tag v0.3.0` |
 | `claude install [version]` | Install a specific native-binary version. Accepts `stable`, `latest`, or an explicit version string | `claude install 2.1.131` |
 | `claude project purge [path]` | Delete all local Claude Code state for a project (transcripts, tasks, debug logs, file-edit history, prompt history, and `~/.claude.json` entry). Omit `[path]` for an interactive picker. Flags: `--dry-run` to preview, `-y/--yes` to skip confirmation, `-i/--interactive` to confirm each item, `--all` for every project (v2.1.126+) | `claude project purge ~/work/repo --dry-run` |
@@ -134,7 +135,7 @@ claude -p "list todos" | grep "URGENT"
 ### Model Selection Examples
 
 ```bash
-# Use Opus 4.7 for complex tasks
+# Use Opus 4.8 for complex tasks
 claude --model opus "design a caching strategy"
 
 # Use Haiku 4.5 for quick tasks
@@ -252,7 +253,7 @@ claude -p --json-schema '{"type":"object","properties":{"bugs":{"type":"array"}}
 | `--add-dir` | Add additional working directories | `claude --add-dir ../apps ../lib` |
 | `--setting-sources` | Comma-separated setting sources | `claude --setting-sources user,project` |
 
-> **`/config` persistence (v2.1.119)**: Changes made interactively via the `/config` command are now written to `~/.claude/settings.json` and participate in the normal precedence chain (project → local → policy → user). Before v2.1.119, some `/config` changes were session-only. See [Memory & Settings](../02-memory/README.md) for the full precedence order.
+> **`/config` persistence (v2.1.119)**: Changes made interactively via the `/config` command are now written to `~/.claude/settings.json` and participate in the normal precedence chain (policy → local → project → user). Before v2.1.119, some `/config` changes were session-only. See [Memory & Settings](../02-memory/README.md) for the full precedence order.
 | `--settings` | Load settings from file or JSON | `claude --settings ./settings.json` |
 | `--plugin-dir` | Load plugins from directory (repeatable) | `claude --plugin-dir ./my-plugin` |
 
@@ -461,6 +462,36 @@ When multiple agent definitions exist, they are loaded in this priority order:
 3. **User-level** (`~/.claude/agents/`) - All projects
 
 CLI-defined agents override both project and user agents for the session. Project-level agents override user-level agents when their names collide. See [Lesson 04 — Subagents](../04-subagents/README.md#file-locations) for the full priority table including plugin-level agents.
+
+### Agent View (`claude agents`, v2.1.139+)
+
+> **Research Preview** — feature is stable enough for daily use but may change.
+
+`claude agents` opens the **Agent View** — a single list of every Claude Code session on the machine with its current status (`running`, `blocked on you`, `done`). It is the replacement for juggling multiple terminal tabs when you run background agents, scheduled tasks, or `--bg`-launched sessions.
+
+```bash
+# Open the Agent View
+claude agents
+```
+
+When you dispatch a session from the view (or via `claude --bg <prompt>`), you can pass the same configuration flags you would pass to `claude` itself. Flags introduced for the Agent View dispatch path:
+
+| Flag | Since | Description |
+|------|-------|-------------|
+| `--cwd <path>` | v2.1.141 | Scope the session list (or new session) to a specific working directory |
+| `--add-dir <path>` | v2.1.142 | Add directories to the dispatched session's workspace |
+| `--settings <path>` | v2.1.142 | Use a specific `settings.json` for the dispatched session |
+| `--mcp-config <path>` | v2.1.142 | Use a specific MCP config for the dispatched session |
+| `--plugin-dir <path>` | v2.1.142 | Use a specific plugin directory for the dispatched session |
+| `--permission-mode <mode>` | v2.1.142 | Set permission mode (`plan`, `acceptEdits`, `auto`, etc.) for the dispatched session |
+| `--model <model>` | v2.1.142 | Pin a model for the dispatched session |
+| `--effort <level>` | v2.1.142 | Pin an effort level (`low`/`medium`/`high`/`xhigh`/`max`) |
+| `--dangerously-skip-permissions` | v2.1.142 | Run the dispatched session without permission prompts (use only in sandboxes) |
+| `--json` | v2.1.145 | Print the agent list as machine-readable JSON for scripting (status bars, session pickers, tmux-resurrect integrations) |
+
+Sessions that finish their work but leave a background shell open move from "Working" to "Completed" (v2.1.141 fix). Within an attached agent session, `Shift+Tab` cycles through permission modes including auto mode (v2.1.143).
+
+**Pin a session** — press `Ctrl+T` on a session in `claude agents` to pin it (v2.1.147). Pinned background sessions stay alive when idle, are restarted in place to apply Claude Code updates, and are shed under memory pressure only after non-pinned sessions. (This `Ctrl+T` is scoped to the Agent View; in the main session it toggles the task list view.)
 
 ---
 
@@ -717,9 +748,9 @@ Claude Code supports multiple models with different capabilities:
 
 | Model | ID | Context Window | Notes |
 |-------|-----|----------------|-------|
-| Opus 4.7 | `claude-opus-4-7` | 1M tokens (1M context fix landed in v2.1.117) | Most capable, adaptive effort levels; `xhigh` is the default effort on Claude Code since Opus 4.7 launch (2026-04-16) |
+| Opus 4.8 | `claude-opus-4-8` | 1M tokens | Most capable; adaptive effort levels `low → max`; default effort `high` (v2.1.154) |
 | Sonnet 4.6 | `claude-sonnet-4-6` | 1M tokens | Balanced speed and capability; default effort for Pro/Max subscribers raised from `medium` to `high` in v2.1.117 |
-| Haiku 4.5 | `claude-haiku-4-5` | 1M tokens | Fastest, best for quick tasks |
+| Haiku 4.5 | `claude-haiku-4-5` | 200K tokens | Fastest, best for quick tasks; no effort levels |
 
 ### Model Selection
 
@@ -736,22 +767,24 @@ claude --model opusplan "design and implement the API"
 /fast
 ```
 
-### Effort Levels (Opus 4.7)
+> **Fast Mode now runs on Opus 4.8 (v2.1.154)**: As of v2.1.154, `/fast` runs **Opus 4.8** by default as a research preview — about 2× the standard rate for ~2.5× the output speed. It previously flipped from Opus 4.6 to Opus 4.7 in v2.1.142. The `CLAUDE_CODE_OPUS_4_6_FAST_MODE_OVERRIDE` env var was **deprecated in v2.1.154 and removed on 2026-06-01**; to use fast mode on Opus 4.6 now, run `/model claude-opus-4-6[1m]` then `/fast on`.
 
-Opus 4.7 supports adaptive reasoning with effort levels, ordered from lightest to heaviest: `low` (○), `medium` (◐), `high` (●), `xhigh` (default on Claude Code since Opus 4.7 launch, 2026-04-16), and `max` (Opus 4.7 only). On Opus 4.6 / Sonnet 4.6, the default effort for Pro/Max subscribers was raised from `medium` to `high` in v2.1.117.
+### Effort Levels (Opus 4.8 / Opus 4.7)
+
+Opus 4.8 and Opus 4.7 support adaptive reasoning with effort levels, ordered from lightest to heaviest: `low` (○), `medium` (◐), `high` (●), `xhigh`, and `max`. The **default** is `high` on Opus 4.8 (since v2.1.154), Opus 4.6, and Sonnet 4.6, and `xhigh` on Opus 4.7. `xhigh` is available on Opus 4.8 and Opus 4.7; `max` works on Opus 4.8/4.7/4.6 and Sonnet 4.6 (session-only). Haiku 4.5 has no effort levels. On Opus 4.6 / Sonnet 4.6, the default effort for Pro/Max subscribers was raised from `medium` to `high` in v2.1.117.
 
 ```bash
 # Set effort level via CLI flag
-claude --effort xhigh "complex review"
+claude --effort high "complex review"
 
 # Set effort level via slash command
-/effort xhigh
+/effort high
 
 # Set effort level via environment variable
-export CLAUDE_CODE_EFFORT_LEVEL=xhigh   # low, medium, high, xhigh (default on Opus 4.7), or max (Opus 4.7 only)
+export CLAUDE_CODE_EFFORT_LEVEL=high   # low, medium, high, xhigh (Opus 4.8/4.7), or max — default is high on Opus 4.8
 ```
 
-The "ultrathink" keyword in prompts activates deep reasoning. The `max` effort level is exclusive to Opus 4.7.
+The "ultrathink" keyword in prompts activates deep reasoning. The `/effort` menu also offers `ultracode`, which is **not** a model effort level — it sends `xhigh` and has Claude orchestrate dynamic workflows (session-only).
 
 ---
 
@@ -766,7 +799,7 @@ The "ultrathink" keyword in prompts activates deep reasoning. The `max` effort l
 | `ANTHROPIC_DEFAULT_SONNET_MODEL` | Override default Sonnet model ID |
 | `ANTHROPIC_DEFAULT_HAIKU_MODEL` | Override default Haiku model ID |
 | `MAX_THINKING_TOKENS` | Set extended thinking token budget |
-| `CLAUDE_CODE_EFFORT_LEVEL` | Set effort level (`low`/`medium`/`high`/`xhigh`/`max`) — `xhigh` is the default on Opus 4.7; `max` is Opus 4.7 only |
+| `CLAUDE_CODE_EFFORT_LEVEL` | Set effort level (`low`/`medium`/`high`/`xhigh`/`max`) — default is `high` on Opus 4.8 (`xhigh` on Opus 4.7); `xhigh` needs Opus 4.8/4.7; `max` works on Opus 4.8/4.7/4.6 and Sonnet 4.6 |
 | `CLAUDE_CODE_SIMPLE` | Minimal mode, set by `--bare` flag |
 | `CLAUDE_CODE_DISABLE_AUTO_MEMORY` | Disable automatic CLAUDE.md updates |
 | `CLAUDE_CODE_DISABLE_BACKGROUND_TASKS` | Disable background task execution |
@@ -801,6 +834,8 @@ The "ultrathink" keyword in prompts activates deep reasoning. The `max` effort l
 | `CLAUDE_CODE_FORCE_SYNC_OUTPUT` | Set to `1` to force synchronous output for terminals where auto-detection misses (e.g., Emacs `eat`) (v2.1.129+) |
 | `CLAUDE_CODE_PACKAGE_MANAGER_AUTO_UPDATE` | Set to `1` to enable background upgrades for Homebrew/WinGet installs (which normally do not auto-update) (v2.1.129+) |
 | `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | Set to `1` to opt in to gateway `/v1/models` discovery when `ANTHROPIC_BASE_URL` is set. Without it, `/model` shows the built-in static list (v2.1.129+) |
+| `CLAUDE_CODE_ENABLE_AUTO_MODE` | Set to `1` to opt in to auto mode on Bedrock, Vertex, and Foundry for Opus 4.7/4.8 (v2.1.158+) |
+| `CLAUDE_CODE_OPUS_4_6_FAST_MODE_OVERRIDE` | **Removed (no-op as of v2.1.160).** Previously pinned Fast Mode (`/fast`) to Opus 4.6. To use fast mode on Opus 4.6 now, run `/model claude-opus-4-6[1m]` then `/fast on`. |
 
 > **`ENABLE_TOOL_SEARCH` on Vertex AI (v2.1.119+)**: Tool search is **disabled by default on Google Cloud Vertex AI** deployments. Users who want the tool-search capability on Vertex must explicitly opt in with `export ENABLE_TOOL_SEARCH=true`. On direct Anthropic API it remains enabled by default.
 
@@ -908,17 +943,19 @@ claude -p --output-format json "query"
 
 ---
 
-**Last Updated**: May 9, 2026
-**Claude Code Version**: 2.1.138
+**Last Updated**: June 2, 2026
+**Claude Code Version**: 2.1.160
 **Sources**:
 - https://code.claude.com/docs/en/cli-reference
 - https://code.claude.com/docs/en/settings
 - https://code.claude.com/docs/en/changelog
-- https://www.anthropic.com/news/claude-opus-4-7
-- https://github.com/anthropics/claude-code/releases/tag/v2.1.113
-- https://github.com/anthropics/claude-code/releases/tag/v2.1.116
+- https://code.claude.com/docs/en/model-config
+- https://platform.claude.com/docs/en/about-claude/models/overview
+- https://www.anthropic.com/news/claude-opus-4-8
 - https://github.com/anthropics/claude-code/releases/tag/v2.1.117
-- https://github.com/anthropics/claude-code/releases/tag/v2.1.118
-- https://github.com/anthropics/claude-code/releases/tag/v2.1.131
-- https://github.com/anthropics/claude-code/releases/tag/v2.1.138
-**Compatible Models**: Claude Sonnet 4.6, Claude Opus 4.7, Claude Haiku 4.5
+- https://github.com/anthropics/claude-code/releases/tag/v2.1.139
+- https://github.com/anthropics/claude-code/releases/tag/v2.1.142
+- https://github.com/anthropics/claude-code/releases/tag/v2.1.154
+- https://code.claude.com/docs/en/plugins
+- https://code.claude.com/docs/en/overview
+**Compatible Models**: Claude Sonnet 4.6, Claude Opus 4.8, Claude Haiku 4.5

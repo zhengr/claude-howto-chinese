@@ -12,6 +12,7 @@ dependencies = [
     "httpx",
     "pillow",
     "tenacity",
+    "jinja2",
 ]
 
 [project.optional-dependencies]

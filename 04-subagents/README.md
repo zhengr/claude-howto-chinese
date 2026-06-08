@@ -387,6 +387,8 @@ You can explicitly request a specific subagent:
 > Ask the debugger subagent to investigate this error
 ```
 
+> **Case- and separator-insensitive `subagent_type` matching (v2.1.140)**: `subagent_type` (in `Agent` tool calls or `--agent` flags) is matched case-insensitively and ignores separator style — `code-reviewer`, `Code Reviewer`, and `code_reviewer` all resolve to the same agent. This removes a long-standing footgun where minor capitalization differences silently fell back to the default agent.
+
 ### @-Mention Invocation
 
 Use the `@` prefix to guarantee a specific subagent is invoked (bypasses automatic delegation heuristics):
@@ -1206,6 +1208,25 @@ graph TD
 
 ---
 
+## Observability
+
+> **Added in v2.1.139.**
+
+API requests originating from a subagent carry two extra HTTP headers so traces and logs can be correlated back to the dispatching session:
+
+| Header | Description |
+|--------|-------------|
+| `x-claude-code-agent-id` | UUID of the subagent making the request. |
+| `x-claude-code-parent-agent-id` | UUID of the agent that dispatched this subagent (the main agent, or a higher-level subagent in a chain). |
+
+The same identifiers are exposed on `claude_code.llm_request` OpenTelemetry spans as the attributes `claude.code.agent.id` and `claude.code.agent.parent_id`. Use them to:
+
+- Attribute API spend to a specific subagent type rather than the parent session
+- Reconstruct a chain of agent invocations after the fact (parent_id forms a tree)
+- Alert on runaway subagents (e.g., one `agent.id` accounting for >50% of session spend)
+
+See the OpenTelemetry section in [Advanced Features → Telemetry](../09-advanced-features/README.md) for end-to-end exporter setup.
+
 ## Additional Resources
 
 - [Official Subagents Documentation](https://code.claude.com/docs/en/sub-agents)
@@ -1217,12 +1238,14 @@ graph TD
 
 ---
 
-**Last Updated**: May 9, 2026
-**Claude Code Version**: 2.1.138
+**Last Updated**: June 2, 2026
+**Claude Code Version**: 2.1.160
 **Sources**:
 - https://code.claude.com/docs/en/sub-agents
 - https://code.claude.com/docs/en/agent-teams
 - https://github.com/anthropics/claude-code/releases/tag/v2.1.117
 - https://github.com/anthropics/claude-code/releases/tag/v2.1.131
 - https://github.com/anthropics/claude-code/releases/tag/v2.1.138
-**Compatible Models**: Claude Sonnet 4.6, Claude Opus 4.7, Claude Haiku 4.5
+- https://github.com/anthropics/claude-code/releases/tag/v2.1.139
+- https://github.com/anthropics/claude-code/releases/tag/v2.1.140
+**Compatible Models**: Claude Sonnet 4.6, Claude Opus 4.8, Claude Haiku 4.5

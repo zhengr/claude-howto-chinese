@@ -1,6 +1,6 @@
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="resources/logos/claude-howto-logo-dark.svg">
-  <img alt="Claude How To" src="resources/logos/claude-howto-logo.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="../resources/logos/claude-howto-logo-dark.svg">
+  <img alt="Claude How To" src="../resources/logos/claude-howto-logo.svg">
 </picture>
 
 # Claude Code 示例 - 完整索引
@@ -663,7 +663,7 @@ cp 01-slash-commands/optimize.md .claude/commands/
 cp 04-subagents/code-reviewer.md .claude/agents/
 
 # 安装 skill
-cp -r 03-skills/code-review ~/.claude/skills/
+cp -r 03-skills/code-review-specialist ~/.claude/skills/
 
 # 或直接安装完整插件
 /plugin install pr-review
@@ -817,13 +817,13 @@ claude -p "Run tests and report results"
 
 - `01-slash-commands/optimize.md` - 性能分析
 - `04-subagents/code-reviewer.md` - 性能审查
-- `03-skills/code-review/` - 性能指标
+- `03-skills/code-review-specialist/` - 性能指标
 - `07-plugins/pr-review/agents/performance-analyzer.md` - 性能专家
 
 ### 安全
 
 - `04-subagents/secure-reviewer.md` - 安全审查
-- `03-skills/code-review/` - 安全分析
+- `03-skills/code-review-specialist/` - 安全分析
 - `07-plugins/pr-review/` - 安全检查
 
 ### 测试

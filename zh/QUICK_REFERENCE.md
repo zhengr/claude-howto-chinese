@@ -1,6 +1,6 @@
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="resources/logos/claude-howto-logo-dark.svg">
-  <img alt="Claude How To" src="resources/logos/claude-howto-logo.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="../resources/logos/claude-howto-logo-dark.svg">
+  <img alt="Claude How To" src="../resources/logos/claude-howto-logo.svg">
 </picture>
 
 # Claude Code 示例 - 速查卡
@@ -28,10 +28,10 @@ cp 02-memory/personal-CLAUDE.md ~/.claude/CLAUDE.md
 ### Skills
 ```bash
 # 个人 skills
-cp -r 03-skills/code-review ~/.claude/skills/
+cp -r 03-skills/code-review-specialist ~/.claude/skills/
 
 # 项目 skills
-cp -r 03-skills/code-review .claude/skills/
+cp -r 03-skills/code-review-specialist .claude/skills/
 ```
 
 ### Subagents
@@ -147,7 +147,7 @@ cp 04-subagents/code-reviewer.md .claude/agents/
 # 使用：自动委派
 
 # 方法 3：skill
-cp -r 03-skills/code-review ~/.claude/skills/
+cp -r 03-skills/code-review-specialist ~/.claude/skills/
 # 使用：自动触发
 
 # 方法 4：插件（推荐）
@@ -363,7 +363,7 @@ cp 05-mcp/github-mcp.json .mcp.json
 ### 第 2 周
 ```bash
 # 安装 skill
-cp -r 03-skills/code-review ~/.claude/skills/
+cp -r 03-skills/code-review-specialist ~/.claude/skills/
 
 # 让它自动触发
 # 直接说：“Review this code for issues”
@@ -442,7 +442,7 @@ echo $GITHUB_TOKEN
 |------|--------|------|
 | 快速快捷操作 | Slash Command（55+） | `01-slash-commands/optimize.md` |
 | 团队规范 | Memory | `02-memory/project-CLAUDE.md` |
-| 自动化工作流 | Skill | `03-skills/code-review/` |
+| 自动化工作流 | Skill | `03-skills/code-review-specialist/` |
 | 专门任务 | Subagent | `04-subagents/code-reviewer.md` |
 | 外部数据 | MCP（+ Elicitation、WebSocket） | `05-mcp/github-mcp.json` |
 | 事件自动化 | Hook（25 个事件、4 类） | `06-hooks/pre-commit.sh` |

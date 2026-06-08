@@ -93,6 +93,22 @@ The default hook type. Executes a shell command and communicates via JSON stdin/
 }
 ```
 
+#### Exec form (`args`)
+
+> Added in v2.1.139.
+
+Instead of the shell-form `"command": "..."`, a command hook can spawn a binary directly via `execve()` with an `args` array. There is no shell parsing, so path placeholders never need quoting and the configuration is immune to shell-injection bugs.
+
+```json
+{
+  "type": "command",
+  "args": ["python3", "$CLAUDE_PROJECT_DIR/.claude/hooks/validate.py", "--strict"],
+  "timeout": 60
+}
+```
+
+The two forms are **mutually exclusive** — a hook with both `command` and `args` set is rejected at config load. Use `command` when you need pipes, redirection, `&&` chaining, or shell expansions; use `args` when you are calling one binary with arguments.
+
 ### HTTP Hooks
 
 > Added in v2.1.63.
@@ -175,7 +191,7 @@ Subagent-based verification hooks that spawn a dedicated agent to evaluate condi
 
 ## Hook Events
 
-Claude Code supports **29 hook events**:
+Claude Code supports **30 hook events**:
 
 | Event | When Triggered | Matcher Input | Can Block | Common Use |
 |-------|---------------|---------------|-----------|------------|
@@ -191,6 +207,7 @@ Claude Code supports **29 hook events**:
 | **PostToolUseFailure** | Tool execution fails | Tool name | No | Error handling, logging |
 | **PostToolBatch** | After a batch of tool uses completes | (none) | No | Aggregate reporting, batched validation |
 | **Notification** | Notification sent | Notification type | No | Custom notifications |
+| **MessageDisplay** | While assistant message text is displayed | (none) | No | Transform or hide displayed message text (v2.1.152) |
 | **SubagentStart** | Subagent spawned | Agent type name | No | Subagent setup |
 | **SubagentStop** | Subagent finishes | Agent type name | Yes | Subagent validation |
 | **Stop** | Claude finishes responding | (none) | Yes | Task completion check |
@@ -274,6 +291,31 @@ Runs immediately after tool completion. Use for verification, logging, or provid
 |-------|------|-------------|
 | `duration_ms` | number | Tool execution time in milliseconds. Excludes time spent in permission prompts and PreToolUse hook execution. Available on both `PostToolUse` and `PostToolUseFailure` hooks. |
 
+#### Recoverable blocks (`continueOnBlock`, v2.1.139)
+
+By default, a `PostToolUse` hook that returns `"decision": "block"` aborts the current turn. Set `"continueOnBlock": true` on the hook to instead surface the rejection back to Claude as a `tool_result`, so the model can read the feedback and retry or adjust.
+
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/policy-check.py",
+            "continueOnBlock": true
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+Use this when the hook's `reason` is something Claude can act on (e.g., "this file is read-only; write somewhere else"); leave it off when a block must halt the turn entirely.
+
 ### UserPromptSubmit
 
 Runs when user submits a prompt, before Claude processes it.
@@ -326,6 +368,8 @@ Run when Claude finishes responding (Stop) or a subagent completes (SubagentStop
 }
 ```
 
+> **Safety cap on consecutive blocks (v2.1.143)**: If a `Stop` hook returns `"decision": "block"` (or sets `continue: false`) **8 times in a row** for the same turn, Claude Code short-circuits the loop and ends the session with a warning. Override the threshold with the env var `CLAUDE_CODE_STOP_HOOK_BLOCK_CAP=<integer>` (set to `0` to disable the cap entirely). This prevents a buggy Stop hook from looping the session forever.
+
 ### SubagentStart
 
 Runs when a subagent begins execution. The matcher input is the agent type name, allowing hooks to target specific subagent types.
@@ -364,6 +408,19 @@ if [ -n "$CLAUDE_ENV_FILE" ]; then
 fi
 exit 0
 ```
+
+**Session-scoped outputs (v2.1.152):** A `SessionStart` hook can return JSON to re-scan skills and set the session title:
+
+```json
+{
+  "reloadSkills": true,
+  "hookSpecificOutput": {
+    "sessionTitle": "Payments migration"
+  }
+}
+```
+
+Top-level `reloadSkills: true` triggers a skill re-scan in the same session (the same action as the `/reload-skills` command), making skills the hook just installed available immediately. `hookSpecificOutput.sessionTitle` sets the session's display title on startup and resume.
 
 ### SessionEnd
 
@@ -537,6 +594,24 @@ All hooks receive JSON input via stdin:
 > }
 > ```
 
+#### `terminalSequence` (v2.1.141)
+
+Hooks can emit raw OSC (operating system command) escape sequences by setting `terminalSequence` in the JSON output. The host writes the sequence to its controlling terminal when the hook returns — useful for desktop notifications, window-title updates, and terminal bells without requiring a TTY of your own.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `terminalSequence` | string | Raw escape sequence (typically OSC 9 / OSC 0 / OSC 777). Written to the host terminal verbatim. |
+
+Example — fire an OSC 9 desktop notification when a long task completes:
+
+```json
+{
+  "terminalSequence": "]9;Task complete"
+}
+```
+
+Configure it on a `Stop` hook so the notification fires when Claude finishes a turn. Sequence support is terminal-dependent; Kitty/iTerm2/Windows Terminal honor OSC 9.
+
 ## Environment Variables
 
 | Variable | Availability | Description |
@@ -549,6 +624,7 @@ All hooks receive JSON input via stdin:
 | `CLAUDE_CODE_SESSIONEND_HOOKS_TIMEOUT_MS` | SessionEnd hooks | Configurable timeout in milliseconds for SessionEnd hooks (overrides default) |
 | `CLAUDE_CODE_SESSION_ID` | Bash tool subprocesses (v2.1.132+) | Session UUID; matches the `session_id` field in hook input JSON. Use to correlate bash logs with hook telemetry. |
 | `CLAUDE_EFFORT` | Bash tool subprocesses (v2.1.133+) | Active effort level (`low`/`medium`/`high`/`xhigh`/`max`); matches `effort.level` in hook input JSON. |
+| `CLAUDE_CODE_STOP_HOOK_BLOCK_CAP` | Process-wide (v2.1.143+) | Max consecutive Stop-hook blocks before the session ends with a warning (default `8`). Set to `0` to disable the cap. |
 
 ## Prompt-Based Hooks
 
@@ -1200,9 +1276,11 @@ MCP tools follow the pattern `mcp__<server>__<tool>`:
 ### Security Notes
 
 - **Workspace trust required:** The `statusLine` and `fileSuggestion` hook output commands now require workspace trust acceptance before they take effect.
+- **Status-line terminal size (v2.1.153):** Status-line command scripts now receive `COLUMNS` and `LINES` environment variables, so a script can adapt its output to the terminal width/height (e.g. `[ "$COLUMNS" -lt 80 ] && short_output`).
 - **HTTP hooks and environment variables:** HTTP hooks require an explicit `allowedEnvVars` list to use environment variable interpolation in URLs. This prevents accidental leakage of sensitive environment variables to remote endpoints.
 - **Managed settings hierarchy:** The `disableAllHooks` setting now respects the managed settings hierarchy, meaning organization-level settings can enforce hook disablement that individual users cannot override.
 - **PowerShell auto-approve (v2.1.119):** PowerShell tool commands can be auto-approved in permission mode, matching Bash. This brings parity for Windows users running Claude Code with PowerShell-backed shell tools.
+- **Bash bare env-var auto-approve closed (v2.1.145):** Before v2.1.145, a Bash command of the form `FOO=bar somecommand` (a bare variable assignment inline with a non-allowlisted command) could be auto-approved when only `FOO=bar` by itself was on the allowlist. v2.1.145 closes this — such commands now hit the permission prompt. Scripts relying on the implicit allow will start prompting; re-allow them explicitly via a `Bash(...)` permission rule that covers the full command, not just the variable assignment.
 
 ### Best Practices
 
@@ -1371,12 +1449,13 @@ Edit `~/.claude/settings.json` or `.claude/settings.json` with the hook configur
 
 ---
 
-**Last Updated**: May 9, 2026
-**Claude Code Version**: 2.1.138
+**Last Updated**: June 2, 2026
+**Claude Code Version**: 2.1.160
 **Sources**:
 - https://code.claude.com/docs/en/hooks
 - https://code.claude.com/docs/en/changelog
-- https://github.com/anthropics/claude-code/releases/tag/v2.1.118
-- https://github.com/anthropics/claude-code/releases/tag/v2.1.131
-- https://github.com/anthropics/claude-code/releases/tag/v2.1.138
-**Compatible Models**: Claude Sonnet 4.6, Claude Opus 4.7, Claude Haiku 4.5
+- https://github.com/anthropics/claude-code/releases/tag/v2.1.139
+- https://github.com/anthropics/claude-code/releases/tag/v2.1.145
+- https://github.com/anthropics/claude-code/releases/tag/v2.1.152
+- https://github.com/anthropics/claude-code/releases/tag/v2.1.153
+**Compatible Models**: Claude Sonnet 4.6, Claude Opus 4.8, Claude Haiku 4.5

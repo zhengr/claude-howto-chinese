@@ -17,12 +17,12 @@
 |---------|----------|----------|-------|-----------|
 | **Slash Commands** | 60+ | 8 | 68+ | [01-slash-commands/](01-slash-commands/) |
 | **Subagents** | 6 | 11 | 17 | [04-subagents/](04-subagents/) |
-| **Skills** | 5 bundled | 6 | 11 | [03-skills/](03-skills/) |
+| **Skills** | 9 bundled | 6 | 15 | [03-skills/](03-skills/) |
 | **Plugins** | - | 3 | 3 | [07-plugins/](07-plugins/) |
 | **MCP Servers** | 1 | 8 | 9 | [05-mcp/](05-mcp/) |
-| **Hooks** | 28 events | 8 | 8 | [06-hooks/](06-hooks/) |
+| **Hooks** | 29 events | 8 | 8 | [06-hooks/](06-hooks/) |
 | **Memory** | 7 types | 3 | 3 | [02-memory/](02-memory/) |
-| **Total** | **99** | **47** | **121** | |
+| **Total** | **103** | **47** | **125** | |
 
 ---
 
@@ -60,13 +60,15 @@ Commands are user-invoked shortcuts that execute specific actions.
 | `/cost` | Shortcut alias that opens the cost tab of `/usage` (v2.1.118+) | Monitor spending |
 | `/context` | Show context window usage | Manage conversation length |
 | `/export` | Export conversation | Save for reference |
-| `/extra-usage` | Configure extra usage limits | Rate limit management |
+| `/usage-credits` | Configure extra usage limits (renamed from `/extra-usage` in v2.1.144; old name still works as alias) | Rate limit management |
 | `/feedback` | Submit feedback or bug report | Report issues |
 | `/login` | Authenticate with Anthropic | Access features |
 | `/logout` | Sign out | Switch accounts |
 | `/sandbox` | Toggle sandbox mode | Safe command execution |
 | `/doctor` | Run diagnostics | Troubleshoot issues |
 | `/reload-plugins` | Reload installed plugins | Plugin management |
+| `/reload-skills` | Re-scan skill directories without restarting (v2.1.152) | Skill management |
+| `/workflows` | View running and completed dynamic workflow runs (v2.1.154) | Multi-agent orchestration |
 | `/release-notes` | Show release notes | Check new features |
 | `/remote-control` | Enable remote control | Remote access |
 | `/permissions` | Manage permissions | Control access |
@@ -80,7 +82,7 @@ Commands are user-invoked shortcuts that execute specific actions.
 | `/teleport` | Transfer session to another machine | Continue work remotely |
 | `/desktop` | Open Claude Desktop app | Switch to desktop interface |
 | `/theme` | Change color theme; v2.1.118 added custom named themes via `~/.claude/themes/<name>.json` (plugins can ship a `themes/` dir) | Customize appearance |
-| `/usage` | Canonical command for usage/cost/stats — merged `/cost` and `/stats` into a single tabbed view (v2.1.118) | Monitor quota and costs |
+| `/usage` | Canonical command for usage/cost/stats — merged `/cost` and `/stats` into a single tabbed view (v2.1.118); as of v2.1.149 the cost view breaks spending down by category (skills, subagents, plugins, per-MCP-server) | Monitor quota and costs |
 | `/focus` | Toggle focus view (distraction-free output display) | Reduce visual noise during long tasks |
 | `/fork` | Fork current conversation | Explore alternatives |
 | `/stats` | Shortcut alias that opens the stats tab of `/usage` (v2.1.118+) | Review session metrics |
@@ -200,7 +202,7 @@ Auto-invoked capabilities with instructions, scripts, and templates.
 
 | Skill | Description | When Auto-Invoked | Scope | Installation |
 |-------|-------------|-------------------|-------|--------------|
-| `code-review` | Comprehensive code review | "Review this code", "Check quality" | Project | `cp -r 03-skills/code-review .claude/skills/` |
+| `code-review-specialist` | Comprehensive code review | "Review this code", "Check quality" | Project | `cp -r 03-skills/code-review-specialist .claude/skills/` |
 | `brand-voice` | Brand consistency checker | Writing marketing copy | Project | `cp -r 03-skills/brand-voice .claude/skills/` |
 | `doc-generator` | API documentation generator | "Generate docs", "Document API" | Project | `cp -r 03-skills/doc-generator .claude/skills/` |
 | `refactor` | Systematic code refactoring (Martin Fowler) | "Refactor this", "Clean up code" | User | `cp -r 03-skills/refactor ~/.claude/skills/` |
@@ -239,11 +241,16 @@ cp -r 03-skills/* ~/.claude/skills/
 
 | Skill | Description | When Auto-Invoked |
 |-------|-------------|-------------------|
-| `/simplify` | Review code for quality | After writing code |
 | `/batch` | Run prompts on multiple files | Batch operations |
-| `/debug` | Debug failing tests/errors | Debugging sessions |
-| `/loop` | Run prompts on interval | Recurring tasks |
 | `/claude-api` | Build apps with Claude API | API development |
+| `/debug` | Debug failing tests/errors | Debugging sessions |
+| `/fewer-permission-prompts` | Scan transcripts and propose a prioritized allowlist | Reduce repeat permission prompts |
+| `/loop` | Run prompts on interval | Recurring tasks |
+| `/run` *(v2.1.145+)* | Launch this project's app to see a change running | Verifying a change in the real app |
+| `/run-skill-generator` *(v2.1.145+)* | Teach `/run`/`/verify` how to handle a specific project | First-time project setup for `/run` |
+| `/code-review` | Review the current diff for correctness bugs at a chosen effort level (e.g. `/code-review high`); pass `--comment` to post findings as inline PR comments | After writing code, before landing a PR |
+| `/simplify` *(distinct again since v2.1.154)* | Cleanup-only review (reuse / simplification / efficiency / altitude) that applies the fixes; does not hunt bugs | Tidying code without a bug hunt |
+| `/verify` *(v2.1.145+)* | Build, run, and observe the app to confirm a fix works | Validating a fix end-to-end |
 
 ---
 
@@ -340,12 +347,16 @@ Event-driven automation that executes shell commands on Claude Code events.
 | Event | Description | When Triggered | Use Cases |
 |-------|-------------|----------------|-----------|
 | `SessionStart` | Session begins/resumes | Session initialization | Setup tasks |
+| `Setup` | Initial environment setup (one-time per session) | First-time session bootstrap | Provision tooling, install deps |
 | `InstructionsLoaded` | Instructions loaded | CLAUDE.md or rules file loaded | Custom instruction handling |
 | `UserPromptSubmit` | Before prompt processing | User sends message | Input validation |
+| `UserPromptExpansion` | User prompt expanded (@-mentions, slash commands resolved) | After expansion, before submit | Transform or inspect expanded prompt |
 | `PreToolUse` | Before tool execution | Before any tool runs | Validation, logging |
 | `PermissionRequest` | Permission dialog shown | Before sensitive actions | Custom approval flows |
+| `PermissionDenied` | User denies a permission prompt | After permission decline | Logging, analytics, policy enforcement |
 | `PostToolUse` | After tool succeeds | After any tool completes | Formatting, notifications |
 | `PostToolUseFailure` | Tool execution fails | After tool error | Error handling, logging |
+| `PostToolBatch` | After a batch of tool uses completes | End of a tool batch | Aggregate reporting, batched validation |
 | `Notification` | Notification sent | Claude sends notification | External alerts |
 | `SubagentStart` | Subagent spawned | Subagent task starts | Initialize subagent context |
 | `SubagentStop` | Subagent finishes | Subagent task complete | Chain actions |
@@ -471,6 +482,8 @@ cp 02-memory/personal-CLAUDE.md ~/.claude/CLAUDE.md
 | **MCP Elicitation** | MCP servers can request user input during tool execution | Handle via `Elicitation` and `ElicitationResult` hook events |
 | **Plugin LSP Support** | Language Server Protocol integration via plugins | Configure LSP servers in `plugin.json` for editor features |
 | **Managed Drop-ins** | Organization-managed drop-in configurations (v2.1.83) | Admin-configured via managed policies; auto-applied to all users |
+| **`claude plugin init`** | Scaffold a new plugin in `.claude/skills`; such plugins auto-load with no marketplace (v2.1.157) | Run `claude plugin init <name>` |
+| **Auto Mode on Bedrock/Vertex/Foundry** | Auto mode available on third-party providers for Opus 4.7/4.8 — opt-in (v2.1.158) | Set `CLAUDE_CODE_ENABLE_AUTO_MODE=1` |
 
 ---
 
@@ -530,11 +543,14 @@ chmod +x ~/.claude/hooks/*.sh
 
 ---
 
-**Last Updated**: May 9, 2026
-**Claude Code Version**: 2.1.138
+**Last Updated**: June 2, 2026
+**Claude Code Version**: 2.1.160
 **Sources**:
 - https://code.claude.com/docs/en/overview
 - https://code.claude.com/docs/en/commands
 - https://code.claude.com/docs/en/hooks
-- https://github.com/anthropics/claude-code/releases/tag/v2.1.138
-**Compatible Models**: Claude Sonnet 4.6, Claude Opus 4.7, Claude Haiku 4.5
+- https://github.com/anthropics/claude-code/releases/tag/v2.1.145
+- https://github.com/anthropics/claude-code/releases/tag/v2.1.154
+- https://code.claude.com/docs/en/plugins
+- https://code.claude.com/docs/en/cli-reference
+**Compatible Models**: Claude Sonnet 4.6, Claude Opus 4.8, Claude Haiku 4.5

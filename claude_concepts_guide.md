@@ -1312,7 +1312,7 @@ Claude Code now includes 5 bundled skills available out of the box:
 
 | Skill | Command | Purpose |
 |-------|---------|---------|
-| **Simplify** | `/simplify` | Simplify complex code or explanations |
+| **Code Review** | `/code-review` | Review the current diff for correctness bugs at a chosen effort level (renamed from `/simplify` in v2.1.146) |
 | **Batch** | `/batch` | Run operations across multiple files or items |
 | **Debug** | `/debug` | Systematic debugging of issues with root cause analysis |
 | **Loop** | `/loop` | Schedule recurring tasks on a timer |
@@ -1327,7 +1327,7 @@ These bundled skills are always available and do not require installation or con
 **Directory Structure:**
 
 ```
-~/.claude/skills/code-review/
+~/.claude/skills/code-review-specialist/
 ├── SKILL.md
 ├── templates/
 │   ├── review-checklist.md
@@ -1337,7 +1337,7 @@ These bundled skills are always available and do not require installation or con
     └── compare-complexity.py
 ```
 
-**File:** `~/.claude/skills/code-review/SKILL.md`
+**File:** `~/.claude/skills/code-review-specialist/SKILL.md`
 
 ```yaml
 ---
@@ -2813,12 +2813,16 @@ Claude Code supports **29 hook events** across five hook types (command, http, m
 | Hook Event | Trigger | Use Cases |
 |------------|---------|-----------|
 | **SessionStart** | Session begins/resumes/clear/compact | Environment setup, initialization |
+| **Setup** | Initial environment setup (one-time per session) | Provision tooling, install deps |
 | **InstructionsLoaded** | CLAUDE.md or rules file loaded | Validation, transformation, augmentation |
 | **UserPromptSubmit** | User submits prompt | Input validation, prompt filtering |
+| **UserPromptExpansion** | User prompt expanded (@-mentions, slash commands resolved) | Transform or inspect expanded prompt |
 | **PreToolUse** | Before any tool runs | Validation, approval gates, logging |
 | **PermissionRequest** | Permission dialog shown | Auto-approve/deny flows |
+| **PermissionDenied** | User denies a permission prompt | Logging, analytics, policy enforcement |
 | **PostToolUse** | After tool succeeds | Auto-formatting, notifications, cleanup |
 | **PostToolUseFailure** | Tool execution fails | Error handling, logging |
+| **PostToolBatch** | After a batch of tool uses completes | Aggregate reporting, batched validation |
 | **Notification** | Notification sent | Alerting, external integrations |
 | **SubagentStart** | Subagent spawned | Context injection, initialization |
 | **SubagentStop** | Subagent finishes | Result validation, logging |
@@ -3119,17 +3123,20 @@ Complete configuration example:
 
 ## Models and Reasoning Effort
 
-Claude Code supports three models with adaptive reasoning effort:
+Claude Code supports the following models with adaptive reasoning effort:
 
 | Model | Context Window | Effort Levels | Default Effort (Claude Code) |
 |-------|----------------|---------------|------------------------------|
-| Claude Opus 4.7 | 1M tokens (native) | `low`, `medium`, `high`, `xhigh`, `max` | `xhigh` (since Opus 4.7 launch, 2026-04-16) |
+| Claude Opus 4.8 | 1M tokens (native) | `low`, `medium`, `high`, `xhigh`, `max` | `high` (since v2.1.154) |
+| Claude Opus 4.7 (legacy) | 1M tokens (native) | `low`, `medium`, `high`, `xhigh`, `max` | `xhigh` (since Opus 4.7 launch, 2026-04-16) |
 | Claude Sonnet 4.6 | 1M tokens | `low`, `medium`, `high`, `max` | `high` for Pro/Max subscribers (raised from `medium` in v2.1.117) |
-| Claude Haiku 4.5 | 200K tokens | `low`, `medium`, `high` | `medium` |
+| Claude Haiku 4.5 | 200K tokens | — (no effort support) | — |
 
-> **Note**: v2.1.117 fixed a bug where Opus 4.7 sessions computed `/context` against 200K instead of the native 1M window — upgrade to v2.1.117 or later to actually get the 1M context on Opus 4.7.
+> **Note**: `xhigh` is available on Opus 4.8 and Opus 4.7; `max` works on Opus 4.8/4.7/4.6 and Sonnet 4.6 (session-only). Haiku 4.5 does not support effort levels.
 
-> **Note**: `/cost` and `/stats` merged into `/usage` in v2.1.118. `/usage` is now the canonical command with tabs for cost/stats/etc.; `/cost` and `/stats` remain as shortcut aliases that open the corresponding tab.
+> **Note**: v2.1.117 fixed a bug where Opus 4.7 sessions computed `/context` against 200K instead of the native 1M window — upgrade to v2.1.117 or later to actually get the 1M context on Opus 4.7. Opus 4.8 also has a native 1M-token window.
+
+> **Note**: `/cost` and `/stats` merged into `/usage` in v2.1.118. `/usage` is now the canonical command with tabs for cost/stats/etc.; `/cost` and `/stats` remain as shortcut aliases that open the corresponding tab. As of v2.1.149, the cost view also breaks spending down by category (skills, subagents, plugins, and per-MCP-server costs).
 
 ## Resources
 
@@ -3139,11 +3146,13 @@ Claude Code supports three models with adaptive reasoning effort:
 - [Anthropic Cookbook](https://github.com/anthropics/anthropic-cookbook)
 
 ---
-**Last Updated**: May 9, 2026
-**Claude Code Version**: 2.1.138
+**Last Updated**: June 2, 2026
+**Claude Code Version**: 2.1.160
 **Sources**:
 - https://code.claude.com/docs/en/overview
 - https://code.claude.com/docs/en/hooks
-- https://www.anthropic.com/news/claude-opus-4-7
-- https://github.com/anthropics/claude-code/releases/tag/v2.1.138
-**Compatible Models**: Claude Sonnet 4.6, Claude Opus 4.7, Claude Haiku 4.5
+- https://code.claude.com/docs/en/model-config
+- https://platform.claude.com/docs/en/about-claude/models/overview
+- https://www.anthropic.com/news/claude-opus-4-8
+- https://github.com/anthropics/claude-code/releases/tag/v2.1.154
+**Compatible Models**: Claude Sonnet 4.6, Claude Opus 4.8, Claude Haiku 4.5
